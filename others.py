@@ -85,7 +85,7 @@ def get_sample_level_info():
                     if geo.has_soft_file(gse_id['gse_id']):
                         soft_file = {}
                         try:
-                            soft_file = geo.read_soft_file(gse_id['gse_id'])
+                            soft_file = geo.read_full_soft_file(gse_id['gse_id'])
                         except:
                             pass
                         Sample_library_selection = ""
@@ -202,7 +202,7 @@ def get_sample_level_possible_fields():
                 soft_file = {}
                 try:
                     print("A")
-                    soft_file = geo.read_soft_file(gse_id['gse_id'])
+                    soft_file = geo.read_full_soft_file(gse_id['gse_id'])
                     print("B")
                 except:
                     pass
@@ -290,7 +290,7 @@ def get_all_gse_id_information():
                 if last_gse_id_found or last_added_gse_id == None:
                     soft_file = {}
                     try:
-                        soft_file = geo.read_soft_file(gse_id['gse_id'])
+                        soft_file = geo.read_full_soft_file(gse_id['gse_id'])
                     except:
                         pass
                     Series_title = ""

@@ -91,7 +91,6 @@ def has_soft_file(gse_id):
         else:
             return False
 
-
 def get_gse_with_soft(gse_ids):
     # final_result = []
     for gse_id in gse_ids:
@@ -111,39 +110,13 @@ def get_gse_with_soft(gse_ids):
             # final_result.append(gse_id)
             yield gse_id
 
-
-def read_soft_file(gse_id):
-    compressed_data = ""
-    stream = ""
-
-    try:
-        url = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=" + gse_id + "&targ=all&form=text&view=brief"
-        with urllib.request.urlopen(url) as response:
-            decompressed_data = response.read()
-    except Exception as err:
-        print(traceback.format_exc())
-        print("Error in "+ gse_id + " tring to add again by another method")
-        try:
-            id = int(int(re.findall(r'\d+', gse_id)[0]) / 1000)
-            if id == 0:
-                id = ""
-            url = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE" + \
-                str(id) + "nnn/" + gse_id + "/soft/" + gse_id + "_family.soft.gz"
-            with urllib.request.urlopen(url) as response:
-                compressed_data = response.read()
-        # Decompress the data
-            decompressed_data = gzip.decompress(compressed_data)
-        except Exception as err:
-            print(traceback.format_exc())
-            print("Not able to parse " + gse_id)
-            return {}
+def parse_soft_file(decompressed_data):
     # Load the decompressed data into an IO stream
+    stream = ""
     try:
         stream = io.StringIO(decompressed_data.decode())
     except:
         stream = io.StringIO(decompressed_data.decode('latin1'))
-
-
     # Read the lines from the stream
     start = False
     what_is_parsed = ''
@@ -183,3 +156,42 @@ def read_soft_file(gse_id):
                     else:
                         final_parse[what_is_parsed][what_is_parsed_value][data_key] = data_value
     return final_parse
+
+def read_series_metadata_from_soft_file(gse_id):
+    decompressed_data = ""
+    url = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=" + gse_id + "&targ=self&form=text&view=brief"
+
+    try:
+        with urllib.request.urlopen(url) as response:
+            decompressed_data = response.read()
+    except Exception as err:
+        print(traceback.format_exc())
+        print("Not able to parse " + gse_id)
+    
+    return parse_soft_file(decompressed_data)
+
+def read_full_soft_file(gse_id):
+    compressed_data = ""
+    try:
+        url = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=" + gse_id + "&targ=all&form=text&view=brief"
+        with urllib.request.urlopen(url) as response:
+            decompressed_data = response.read()
+    except Exception as err:
+        print(traceback.format_exc())
+        print("Error in "+ gse_id + " tring to add again by another method")
+        try:
+            id = int(int(re.findall(r'\d+', gse_id)[0]) / 1000)
+            if id == 0:
+                id = ""
+            url = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE" + \
+                str(id) + "nnn/" + gse_id + "/soft/" + gse_id + "_family.soft.gz"
+            with urllib.request.urlopen(url) as response:
+                compressed_data = response.read()
+        # Decompress the data
+            decompressed_data = gzip.decompress(compressed_data)
+        except Exception as err:
+            print(traceback.format_exc())
+            print("Not able to parse " + gse_id)
+            return {}
+
+    return parse_soft_file(decompressed_data)

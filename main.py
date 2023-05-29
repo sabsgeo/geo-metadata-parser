@@ -27,8 +27,7 @@ def add_series_metadata(number_of_process):
 
 # Step that can be made parallel for sync_metadata_status_from_geo
 def __add_geo_sync_info_to_mongo(sub_series_pattern):
-    print(sub_series_pattern)
-    
+    general_helper.get_diff_between_geo_and_all_geo_series_sync_info(sub_series_pattern)    
 
 # Function that syncs status of updated data
 def sync_metadata_status_from_geo(number_of_process):

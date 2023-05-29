@@ -14,7 +14,7 @@ class ModelData():
     def extract_series_metadata_info_from_softfile(self, gse_id):
         soft_file = {}
         try:
-            soft_file = geo.read_soft_file(gse_id)
+            soft_file = geo.read_full_soft_file(gse_id)
         except Exception as err:
             print("Error in parsing " + gse_id)
             print(traceback.format_exc())

@@ -122,7 +122,7 @@
 from geo import geo_mongo
 from geo import geo
 
-# print(geo.read_soft_file("GSE136706"))
+# print(geo.read_full_soft_file("GSE136706"))
 # import requests
 
 # gse_id = "GSE85566"
