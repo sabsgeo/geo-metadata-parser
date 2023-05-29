@@ -2,6 +2,7 @@
 from geo import geo_mongo
 from geo import geo
 
+
 def get_diff_between_all_geo_series_and_series_metadata():
     geo_mongo_instance = geo_mongo.GeoMongo()
     gse_id_list = list(geo_mongo_instance.all_geo_series_collection.find(
@@ -31,14 +32,18 @@ def get_diff_between_all_geo_series_and_series_metadata():
     obj_sub_lst = [{"gse_id": item} for item in diff_lst]
     return obj_sub_lst
 
+
 def get_diff_between_geo_and_all_geo_series_sync_info(gse_pattern_list):
     geo_mongo_instance = geo_mongo.GeoMongo()
     for each_pattern in gse_pattern_list:
         gse_ids = geo.get_gse_ids_from_pattern(each_pattern['gse_patten'])
         for gse_id in gse_ids:
+            print(gse_id['gse_id'])
             if geo.has_soft_file(gse_id['gse_id']):
-                selected_one = geo_mongo_instance.all_geo_series_collection.find_one({"_id": gse_id.get('gse_id')})
-                last_updated_date = geo.read_series_metadata_from_soft_file(gse_id.get('gse_id')).get(gse_id.get('gse_id'))[0].get("Series_last_update_date")
+                selected_one = geo_mongo_instance.all_geo_series_collection.find_one(
+                    {"_id": gse_id.get('gse_id')})
+                last_updated_date = geo.read_series_metadata_from_soft_file(gse_id.get(
+                    'gse_id')).get("SERIES").get(gse_id.get('gse_id')).get("Series_last_update_date")
                 if selected_one == None:
                     data_to_add = {
                         "_id": gse_id.get('gse_id'),
@@ -51,11 +56,11 @@ def get_diff_between_geo_and_all_geo_series_sync_info(gse_pattern_list):
                         data_to_add)
                 else:
                     data_to_update = {
-                        "status": "not_up_to_date",
-                        "last_updated": last_updated_date 
+                        "status": "up_to_date",
+                        "last_updated": last_updated_date
                     }
                     geo_mongo_instance.all_geo_series_collection.update_one(
-                            { "_id": gse_id.get('gse_id')}, { "$set": data_to_update }, upsert=True)
+                        {"_id": gse_id.get('gse_id')}, {"$set": data_to_update}, upsert=True)
                     # if (selected_one.get("status") == "not_up_to_date"):
                     #     print("No db update")
                     #     continue
@@ -66,6 +71,7 @@ def get_diff_between_geo_and_all_geo_series_sync_info(gse_pattern_list):
                     # else:
                     #     geo_mongo_instance.all_geo_series_collection.update_one(
                     #         {"_id": gse_id.get('gse_id')}, {"$set": {"status": "not_up_to_date"}}, upsert=True)
-                                    
+
             else:
-                print("GSE ID skipped as soft file not present: " + gse_id.get('gse_id'))
+                print("GSE ID skipped as soft file not present: " +
+                      gse_id.get('gse_id'))
