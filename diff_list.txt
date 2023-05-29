@@ -1,0 +1,20 @@
+{
+    '_id': {<class 'str'>}, 
+    'gse_id': {<class 'str'>}, 
+    'Series_title': {<class 'str'>}, 
+    'Series_status': {<class 'str'>}, 
+    'Series_pubmed_id': {<class 'list'>}, 
+    'Series_web_link': {<class 'str'>}, 
+    'Series_summary': {<class 'str'>}, 
+    'Series_overall_design': {<class 'str'>}, 
+    'Series_type': {<class 'list'>}, 
+    'Series_contributor': {<class 'list'>}, 
+    'Series_sample_id': {<class 'list'>}, 
+    'Series_contact_institute': {<class 'str'>}, 
+    'Series_supplementary_file': {<class 'list'>}, 
+    'Series_platform_id': {<class 'list'>}, 
+    'Series_relation': {<class 'list'>}, 
+    'Platform_title': {<class 'list'>}, 
+    'Platform_technology': {<class 'list'>}, 
+    'Platform_organism': {<class 'list'>}
+}
