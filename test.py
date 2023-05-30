@@ -156,50 +156,50 @@ geo_mongo_instance = geo_mongo.GeoMongo()
 #                     "Platform_organism": False
 #                     }))
 # print(gse_id_list_sub)
-final_types = {
-    "_id": set(),
-    "gse_id": set(),
-    "Series_title": set(),
-    "Series_status": set(),
-    "Series_pubmed_id": set(),
-    "Series_web_link": set(),
-    "Series_summary": set(),
-    "Series_overall_design":set(),
-    "Series_type":set(),
-    "Series_contributor":set(),
-    "Series_sample_id":set(),
-    "Series_contact_institute":set(),
-    "Series_supplementary_file":set(),
-    "Series_platform_id":set(),
-    "Series_relation":set(),
-    "Platform_title":set(),
-    "Platform_technology":set(),
-    "Platform_organism":set()
-}
+# final_types = {
+#     "_id": set(),
+#     "gse_id": set(),
+#     "Series_title": set(),
+#     "Series_status": set(),
+#     "Series_pubmed_id": set(),
+#     "Series_web_link": set(),
+#     "Series_summary": set(),
+#     "Series_overall_design":set(),
+#     "Series_type":set(),
+#     "Series_contributor":set(),
+#     "Series_sample_id":set(),
+#     "Series_contact_institute":set(),
+#     "Series_supplementary_file":set(),
+#     "Series_platform_id":set(),
+#     "Series_relation":set(),
+#     "Platform_title":set(),
+#     "Platform_technology":set(),
+#     "Platform_organism":set()
+# }
 
-gse_id_list_sub = list(geo_mongo_instance.series_metadata_collection.find(
-    {}, projection={"_id": False, "Series_title": False, "Series_status": False, "Series_pubmed_id": False,
-                    "Series_web_link": False,
-                    "Series_summary": False,
-                    "Series_summary": False,
-                    "Series_overall_design": False,
-                    "Series_type": False,
-                    "Series_contributor": False,
-                    "Series_sample_id": False,
-                    "Series_contact_institute": False,
-                    "Series_supplementary_file": False,
-                    "Series_platform_id": False,
-                    "Series_relation": False,
-                    "Platform_title": False,
-                    "Platform_technology": False,
-                    "Platform_organism": False
-                    }))
-for gse_id in gse_id_list_sub:
-    gse_series_metadata = geo_mongo_instance.series_metadata_collection.find_one({"_id": gse_id['gse_id']})
-    for keys in gse_series_metadata:
-        final_types[keys].add(type(gse_series_metadata.get(keys)))
+# gse_id_list_sub = list(geo_mongo_instance.series_metadata_collection.find(
+#     {}, projection={"_id": False, "Series_title": False, "Series_status": False, "Series_pubmed_id": False,
+#                     "Series_web_link": False,
+#                     "Series_summary": False,
+#                     "Series_summary": False,
+#                     "Series_overall_design": False,
+#                     "Series_type": False,
+#                     "Series_contributor": False,
+#                     "Series_sample_id": False,
+#                     "Series_contact_institute": False,
+#                     "Series_supplementary_file": False,
+#                     "Series_platform_id": False,
+#                     "Series_relation": False,
+#                     "Platform_title": False,
+#                     "Platform_technology": False,
+#                     "Platform_organism": False
+#                     }))
+# for gse_id in gse_id_list_sub:
+#     gse_series_metadata = geo_mongo_instance.series_metadata_collection.find_one({"_id": gse_id['gse_id']})
+#     for keys in gse_series_metadata:
+#         final_types[keys].add(type(gse_series_metadata.get(keys)))
 
-print(final_types)
+# print(final_types)
 
 # full_lst = [item.get("gse_id") for item in gse_id_list]
 # sub_lst = [item.get("gse_id") for item in gse_id_list_sub]
@@ -246,10 +246,10 @@ print(final_types)
 # print(list1)
 
 
-# list2 = list(geo_mongo_instance.all_geo_series_collection.find({"status": "not_up_to_date"}))
+list2 = list(geo_mongo_instance.all_geo_series_collection.find({"status": "not_up_to_date"}))
 
-# list2 = [item.get("gse_id") for item in list2]
-# print(len(list2))
+list2 = [item.get("gse_id") for item in list2]
+print(len(list2))
 # print(len(list1))
 # list3 = list(set(list1).intersection(list2))
 # print(len(list3))

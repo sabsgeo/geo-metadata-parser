@@ -74,19 +74,28 @@ def has_soft_file(gse_id):
 
     url = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE" + \
         str(id) + "nnn/" + gse_id + "/"
-    response = requests.get(url)
+    links = ""
+    try:
+        response = requests.get(url)
+        # Parse the HTML content using BeautifulSoup
+        soup = BeautifulSoup(response.content, "html.parser")
+        # Getting the date from the list
+        links = str(soup.find_all("pre")[0])
+    except:
+        pass
 
-    # Parse the HTML content using BeautifulSoup
-    soup = BeautifulSoup(response.content, "html.parser")
-
-    # Getting the date from the list
-    links = str(soup.find_all("pre")[0])
     if re.search("soft", links):
         return True
     else:        
         url = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=" + gse_id + "&targ=all&form=text&view=full"
-        response = requests.head(url)
-        if re.search(gse_id + ".txt", json.dumps(dict(response.headers))):
+        search_txt = ""
+        try:
+            response = requests.head(url)
+            search_txt = json.dumps(dict(response.headers))
+        except:
+            pass
+        
+        if re.search(gse_id + ".txt", search_txt):
             return True
         else:
             return False
