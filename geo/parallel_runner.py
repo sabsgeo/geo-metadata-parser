@@ -4,6 +4,12 @@ from time import sleep
 import random
 
 def add_data_in_parallel(funtion_to_call, list_to_parallel, number_of_process, min_mem_in_system, shuffle_list):
+    if len(list_to_parallel) < number_of_process:
+        number_of_process = int(len(list_to_parallel) / 2)
+    
+    if number_of_process < 1:
+        number_of_process = 1
+
     if shuffle_list:
         random.shuffle(list_to_parallel)
     window_span = int(len(list_to_parallel) /  number_of_process)
