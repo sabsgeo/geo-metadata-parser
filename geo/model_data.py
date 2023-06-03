@@ -193,6 +193,7 @@ class ModelData():
             for sample_id in soft_file["SAMPLE"].keys():
                 channel_data = {}
                 each_geo_sample = {
+                    "_id": str(gse_id) + "__" + str(sample_id),
                     "gse_id": str(gse_id),
                     "gsm_id": str(sample_id),
                     "Sample_library_selection": self.soft_data_type_to_string(soft_file["SAMPLE"][sample_id], "Sample_library_selection"),
