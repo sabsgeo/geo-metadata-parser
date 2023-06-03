@@ -136,7 +136,7 @@ def parse_soft_file(decompressed_data):
             start_info = line.split("=")
             try:
                 what_is_parsed = start_info[0].strip()[1:]
-                what_is_parsed_value = start_info[1].strip()
+                what_is_parsed_value = "=".join(start_info[1:]).strip()
             except:
                 continue
             if not (what_is_parsed in final_parse):
@@ -150,7 +150,7 @@ def parse_soft_file(decompressed_data):
                 line_info = line.split("=")
                 if len(line_info) > 1:
                     data_key = line_info[0].strip()[1:]
-                    data_value = line_info[1].strip()
+                    data_value = "=".join(line_info[1:]).strip()
 
                     if "Sample_supplementary_file" in data_key:
                         data_key = "Sample_supplementary_file"

@@ -37,6 +37,19 @@ def sync_metadata_status_from_geo(number_of_process, min_memory, shuffle):
     parallel_runner.add_data_in_parallel(
         __add_geo_sync_info_to_mongo, series_pattern, number_of_process, min_memory, shuffle)
 
+def __add_geo_sample_info_to_mongo(gse_ids):
+    geo_mongo_instance = geo_mongo.GeoMongo()
+    data_model = model_data.ModelData()
+    for gse_id in gse_ids:
+        updated_data = data_model.extract_sample_metadata_info_from_softfile(
+            gse_id.get("gse_id"))
+        if bool(updated_data):
+            geo_mongo_instance.sample_metadata_collection.insert_many(updated_data, ordered=False)
+
+def add_sample_metadata(number_of_process, min_memory, shuffle):
+    gse_ids = general_helper.get_diff_between_all_geo_series_and_sample_metadata()
+    parallel_runner.add_data_in_parallel(__add_geo_sample_info_to_mongo, gse_ids, number_of_process, min_memory, shuffle)
+
 
 def main(function_call, process_number, min_memory, shuffle):
 

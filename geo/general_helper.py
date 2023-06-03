@@ -32,6 +32,37 @@ def get_diff_between_all_geo_series_and_series_metadata():
     obj_sub_lst = [{"gse_id": item} for item in diff_lst]
     return obj_sub_lst
 
+def get_diff_between_all_geo_series_and_sample_metadata():
+    geo_mongo_instance = geo_mongo.GeoMongo()
+    gse_id_list = list(geo_mongo_instance.all_geo_series_collection.find(
+        {}, projection={"_id": False, "gse_patten": False, "last_updated": False, "status": False}))
+
+    gse_id_list_sub = list(geo_mongo_instance.sample_metadata_collection.find(
+        {}, projection={
+                        "_id": False,
+                        "gsm_id": False,
+                        "Sample_library_selection": False, 
+                        "Sample_supplementary_file": False,
+                        "Sample_description": False,
+                        "Sample_type": False,
+                        "Sample_title": False,
+                        "Sample_scan_protocol": False,
+                        "Sample_library_source": False,
+                        "Sample_hyb_protocol": False,
+                        "Sample_relation": False,
+                        "Sample_instrument_model": False,
+                        "Sample_contact_web_link": False,
+                        "Sample_data_processing": False,
+                        "Sample_library_strategy": False,
+                        "ch1": False,
+                        "ch2": False
+                        }))
+
+    full_lst = [item.get("gse_id") for item in gse_id_list]
+    sub_lst = [item.get("gse_id") for item in gse_id_list_sub]
+    diff_lst = list(set(full_lst) - set(sub_lst))
+    obj_sub_lst = [{"gse_id": item} for item in diff_lst]
+    return obj_sub_lst
 
 def get_diff_between_geo_and_all_geo_series_sync_info(gse_pattern_list):
     geo_mongo_instance = geo_mongo.GeoMongo()

@@ -157,3 +157,78 @@ class ModelData():
                     updated_data[metadata] = [each_geo_series[metadata]]
         updated_data["_id"] = each_geo_series["gse_id"]
         return updated_data
+    
+    def soft_data_type_to_string(self, each_geo_series, metadata):
+        if not (metadata in each_geo_series):
+            return ""
+        
+        if isinstance(each_geo_series[metadata], list):
+            return ". ".join(each_geo_series[metadata]).replace(".. ", ". ")
+        else:
+            return each_geo_series[metadata]
+    
+
+    def soft_data_type_to_list(self, each_geo_series, metadata):
+        if not (metadata in each_geo_series):
+            return []
+        
+        if isinstance(each_geo_series[metadata], list):
+            return each_geo_series[metadata]
+        else:
+            return [each_geo_series[metadata]]
+
+    def extract_sample_metadata_info_from_softfile(self, gse_id):
+        soft_file = {}
+        try:
+            soft_file = geo.read_full_soft_file(gse_id)
+        except Exception as err:
+            print("Error in parsing " + gse_id)
+            print(traceback.format_exc())
+
+        if not(bool(soft_file)):
+            return {}
+    
+        all_sample_data = []
+        if "SAMPLE" in soft_file:
+            for sample_id in soft_file["SAMPLE"].keys():
+                channel_data = {}
+                each_geo_sample = {
+                    "gse_id": str(gse_id),
+                    "gsm_id": str(sample_id),
+                    "Sample_library_selection": self.soft_data_type_to_string(soft_file["SAMPLE"][sample_id], "Sample_library_selection"),
+                    "Sample_supplementary_file": self.soft_data_type_to_list(soft_file["SAMPLE"][sample_id], "Sample_supplementary_file"),
+                    "Sample_description": self.soft_data_type_to_string(soft_file["SAMPLE"][sample_id], "Sample_description"),
+                    "Sample_type": self.soft_data_type_to_string(soft_file["SAMPLE"][sample_id], "Sample_type"),
+                    "Sample_title": self.soft_data_type_to_string(soft_file["SAMPLE"][sample_id], "Sample_title"),
+                    "Sample_scan_protocol": self.soft_data_type_to_string(soft_file["SAMPLE"][sample_id], "Sample_scan_protocol"),
+                    "Sample_library_source": self.soft_data_type_to_string(soft_file["SAMPLE"][sample_id], "Sample_library_source"),
+                    "Sample_hyb_protocol": self.soft_data_type_to_string(soft_file["SAMPLE"][sample_id], "Sample_hyb_protocol"),
+                    "Sample_relation": self.soft_data_type_to_list(soft_file["SAMPLE"][sample_id], "Sample_relation"),
+                    "Sample_instrument_model": self.soft_data_type_to_string(soft_file["SAMPLE"][sample_id], "Sample_instrument_model"),
+                    "Sample_contact_web_link": self.soft_data_type_to_string(soft_file["SAMPLE"][sample_id], "Sample_contact_web_link"),
+                    "Sample_data_processing": self.soft_data_type_to_string(soft_file["SAMPLE"][sample_id], "Sample_data_processing"),
+                    "Sample_library_strategy": self.soft_data_type_to_string(soft_file["SAMPLE"][sample_id], "Sample_library_strategy")
+                }
+                
+                if "Sample_channel_count" in soft_file["SAMPLE"][sample_id]:
+                    for channel_count in range(int(soft_file["SAMPLE"][sample_id]["Sample_channel_count"])):
+                        updated_channel_count = channel_count + 1
+                        channel_key = "ch" + \
+                            str(updated_channel_count)
+                        if not (channel_key in channel_data.keys()):
+                            channel_data[channel_key] = {}
+
+                    for sample_keys in soft_file["SAMPLE"][sample_id].keys():
+                        last_key = sample_keys.split(
+                            "_")[-1]
+                        if "ch" in last_key:
+                            channel_data[last_key][sample_keys] = self.soft_data_type_to_string(soft_file["SAMPLE"][sample_id], sample_keys)
+                
+                for channel_sh_keys in channel_data.keys():
+                    channel_data[channel_sh_keys]["char_name"] = channel_sh_keys
+            
+
+                each_geo_sample.update(channel_data)
+                all_sample_data.append(each_geo_sample)
+        
+        return all_sample_data

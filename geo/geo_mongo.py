@@ -20,6 +20,8 @@ class GeoMongo():
         self.state_management_system_collection = None
         self.series_metadata_collection_name = "series_metadata"
         self.series_metadata_collection = None
+        self.sample_metadata_collection_name = "sample_metadata"
+        self.sample_metadata_collection = None
 
         try:
             self.client.admin.command('ping')
@@ -42,6 +44,12 @@ class GeoMongo():
                 raise Exception("Collecttion " + self.series_metadata_collection_name + " not found")
             
             self.series_metadata_collection = self.geo_db.get_collection(self.series_metadata_collection_name)
+
+
+            if not(self.sample_metadata_collection_name in self.geo_db.list_collection_names()):
+                raise Exception("Collecttion " + self.sample_metadata_collection_name + " not found")
+            
+            self.sample_metadata_collection = self.geo_db.get_collection(self.sample_metadata_collection_name)
             
             print("You successfully connected to MongoDB!")
         except Exception as err:
