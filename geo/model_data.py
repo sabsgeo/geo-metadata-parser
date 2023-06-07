@@ -161,7 +161,7 @@ class ModelData():
     def soft_data_type_to_string(self, each_geo_series, metadata):
         if not (metadata in each_geo_series):
             return ""
-        
+
         if isinstance(each_geo_series[metadata], list):
             return ". ".join(each_geo_series[metadata]).replace(".. ", ". ")
         else:
@@ -222,13 +222,8 @@ class ModelData():
                     for sample_keys in soft_file["SAMPLE"][sample_id].keys():
                         last_key = sample_keys.split(
                             "_")[-1]
-                        if "ch" in last_key:
-                            try:
-                                channel_data[last_key][sample_keys] = self.soft_data_type_to_string(soft_file["SAMPLE"][sample_id], sample_keys)
-                            except Exception as err:
-                                print(sample_id)
-                                print(gse_id)
-                                print(traceback.format_exc())
+                        if "_ch" in last_key:
+                            channel_data[last_key][sample_keys] = self.soft_data_type_to_string(soft_file["SAMPLE"][sample_id], sample_keys)
                 
                 for channel_sh_keys in channel_data.keys():
                     channel_data[channel_sh_keys]["char_name"] = channel_sh_keys
