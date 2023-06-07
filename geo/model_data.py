@@ -231,5 +231,7 @@ class ModelData():
 
                 each_geo_sample.update(channel_data)
                 all_sample_data.append(each_geo_sample)
+        else:
+            print("Sample not found for GSE ID "+ gse_id)
         
         return all_sample_data

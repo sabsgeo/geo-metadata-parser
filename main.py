@@ -3,6 +3,7 @@ from geo import model_data
 from geo import parallel_runner
 from geo import general_helper
 from geo import geo
+from geo import geo_helper
 
 import argparse
 import traceback
@@ -51,6 +52,18 @@ def add_sample_metadata(number_of_process, min_memory, shuffle):
     print("Remaining samples to be added" + str(len(gse_ids)))
     parallel_runner.add_data_in_parallel(__add_geo_sample_info_to_mongo, gse_ids, number_of_process, min_memory, shuffle)
 
+
+def __check_sample_level_validity(gse_id_list):
+        for gse_id in gse_id_list:
+            if not(geo_helper.validate_sample_metadata(gse_id.get("gse_id"))):
+                print(gse_id.get("gse_id"))
+
+    
+def validate_sample(number_of_process, min_memory, shuffle):
+    geo_mongo_instance = geo_mongo.GeoMongo()
+    gse_id_list = list(geo_mongo_instance.all_geo_series_collection.find(
+        {}, projection={"_id": False, "gse_patten": False, "last_updated": False, "status": False}))
+    parallel_runner.add_data_in_parallel(__check_sample_level_validity, gse_id_list, number_of_process, min_memory, shuffle)
 
 def main(function_call, process_number, min_memory, shuffle):
 

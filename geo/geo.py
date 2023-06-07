@@ -179,6 +179,9 @@ def read_series_metadata_from_soft_file(gse_id):
     
     return parse_soft_file(decompressed_data)
 
+def get_samples_ids(gse_id):
+   return read_series_metadata_from_soft_file(gse_id).get("SERIES").get(gse_id).get("Series_sample_id")
+
 def read_full_soft_file(gse_id):
     compressed_data = ""
     try:
