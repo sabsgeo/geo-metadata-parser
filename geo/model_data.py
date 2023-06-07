@@ -223,7 +223,12 @@ class ModelData():
                         last_key = sample_keys.split(
                             "_")[-1]
                         if "ch" in last_key:
-                            channel_data[last_key][sample_keys] = self.soft_data_type_to_string(soft_file["SAMPLE"][sample_id], sample_keys)
+                            try:
+                                channel_data[last_key][sample_keys] = self.soft_data_type_to_string(soft_file["SAMPLE"][sample_id], sample_keys)
+                            except Exception as err:
+                                print(sample_id)
+                                print(gse_id)
+                                print(traceback.format_exc())
                 
                 for channel_sh_keys in channel_data.keys():
                     channel_data[channel_sh_keys]["char_name"] = channel_sh_keys
