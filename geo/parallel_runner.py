@@ -31,7 +31,6 @@ def add_data_in_parallel(funtion_to_call, list_to_parallel, number_of_process, m
         for p in proc:
             if not(p.exitcode == None):
                 count = count + 1
-        print(psutil.virtual_memory().free >> 20)
         if psutil.virtual_memory().free >> 20 < min_mem_in_system:
             print(psutil.virtual_memory().free >> 30)
             print("Exiting because of low memory")

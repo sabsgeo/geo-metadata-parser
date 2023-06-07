@@ -48,6 +48,7 @@ def __add_geo_sample_info_to_mongo(gse_ids):
 
 def add_sample_metadata(number_of_process, min_memory, shuffle):
     gse_ids = general_helper.get_diff_between_all_geo_series_and_sample_metadata()
+    print("Remaining samples to be added" + str(len(gse_ids)))
     parallel_runner.add_data_in_parallel(__add_geo_sample_info_to_mongo, gse_ids, number_of_process, min_memory, shuffle)
 
 
