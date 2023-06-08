@@ -3,14 +3,15 @@ from geo import model_data
 from geo import parallel_runner
 from geo import general_helper
 from geo import geo
-from geo import geo_helper
 
 import argparse
 import traceback
+import json
 
 
 # Step that can be made parallel for add_series_metadata
-def __add_series_metadata_to_mongo(gse_ids):
+def __add_series_metadata_to_mongo(all_params):
+    gse_ids = all_params.get("list_to_parallel")
     geo_mongo_instance = geo_mongo.GeoMongo()
     data_model = model_data.ModelData()
     for gse_id in gse_ids:
@@ -24,46 +25,63 @@ def __add_series_metadata_to_mongo(gse_ids):
 def add_series_metadata(number_of_process, min_memory, shuffle):
     diff_list = general_helper.get_diff_between_all_geo_series_and_series_metadata()
     parallel_runner.add_data_in_parallel(
-        __add_series_metadata_to_mongo, diff_list, number_of_process, min_memory, shuffle)
+        __add_series_metadata_to_mongo, {"list_to_parallel": diff_list}, number_of_process, min_memory, shuffle)
 
 
 # Step that can be made parallel for sync_metadata_status_from_geo
-def __add_geo_sync_info_to_mongo(sub_series_pattern):
+def __add_geo_sync_info_to_mongo(all_params):
+    sub_series_pattern = all_params.get("list_to_parallel")
     general_helper.get_diff_between_geo_and_all_geo_series_sync_info(
         sub_series_pattern)
 
 # Function that syncs status of updated data
+
+
 def sync_metadata_status_from_geo(number_of_process, min_memory, shuffle):
     series_pattern = geo.get_series_parrerns_for_geo()
     parallel_runner.add_data_in_parallel(
-        __add_geo_sync_info_to_mongo, series_pattern, number_of_process, min_memory, shuffle)
+        __add_geo_sync_info_to_mongo, {"list_to_parallel": series_pattern}, number_of_process, min_memory, shuffle)
 
-def __add_geo_sample_info_to_mongo(gse_ids):
+
+def __add_geo_sample_info_to_mongo(all_params):
+    gse_ids = all_params.get("list_to_parallel")
     geo_mongo_instance = geo_mongo.GeoMongo()
     data_model = model_data.ModelData()
     for gse_id in gse_ids:
         updated_data = data_model.extract_sample_metadata_info_from_softfile(
             gse_id.get("gse_id"))
         if bool(updated_data):
-            geo_mongo_instance.sample_metadata_collection.insert_many(updated_data, ordered=False)
+            geo_mongo_instance.sample_metadata_collection.insert_many(
+                updated_data, ordered=False)
+
 
 def add_sample_metadata(number_of_process, min_memory, shuffle):
     gse_ids = general_helper.get_diff_between_all_geo_series_and_sample_metadata()
     print("Remaining samples to be added" + str(len(gse_ids)))
-    parallel_runner.add_data_in_parallel(__add_geo_sample_info_to_mongo, gse_ids, number_of_process, min_memory, shuffle)
+    parallel_runner.add_data_in_parallel(__add_geo_sample_info_to_mongo, {
+                                         "list_to_parallel": gse_ids}, number_of_process, min_memory, shuffle)
 
 
-def __check_sample_level_validity(gse_id_list):
-        for gse_id in gse_id_list:
-            if not(geo_helper.validate_sample_metadata(gse_id.get("gse_id"))):
-                print(gse_id.get("gse_id"))
+def __check_sample_level_validity(all_params):
+    gse_id_list = all_params.get("list_to_parallel")
+    db_sample_count = all_params.get("db_sample_count")
+    for gse_id in gse_id_list:
+        number_samples_from_geo = len(geo.get_samples_ids(gse_id.get("gse_id")))
+        number_samples_from_db = db_sample_count.get(gse_id.get("gse_id"))
+        if not(number_samples_from_geo == number_samples_from_db):
+            print("There is a sample number mismatch for " + gse_id.get("gse_id"))
 
-    
+
 def validate_sample(number_of_process, min_memory, shuffle):
     geo_mongo_instance = geo_mongo.GeoMongo()
     gse_id_list = list(geo_mongo_instance.all_geo_series_collection.find(
         {}, projection={"_id": False, "gse_patten": False, "last_updated": False, "status": False}))
-    parallel_runner.add_data_in_parallel(__check_sample_level_validity, gse_id_list, number_of_process, min_memory, shuffle)
+    f = open('count.json')
+    all_sample_from_db = json.load(f)
+
+    parallel_runner.add_data_in_parallel(__check_sample_level_validity, {
+                                         "list_to_parallel": gse_id_list, "db_sample_count": all_sample_from_db}, number_of_process, min_memory, shuffle)
+
 
 def main(function_call, process_number, min_memory, shuffle):
 

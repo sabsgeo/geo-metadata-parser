@@ -1,8 +1,31 @@
 from geo import geo_mongo
 from geo import geo_helper
 
-print(geo_helper.validate_sample_metadata("GSE3363"))
-# geo_mongo_instance = geo_mongo.GeoMongo()
+
+# print(geo_helper.validate_sample_metadata("GSE3363"))
+geo_mongo_instance = geo_mongo.GeoMongo()
+
+field_name = 'gse_id'
+
+# Build the aggregation pipeline
+pipeline = [
+    {"$group": {"_id": f"${field_name}", "count": {"$sum": 1}}},
+    {"$sort": {"count": -1}}
+]
+
+# Execute the aggregation pipeline
+results = geo_mongo_instance.sample_metadata_collection.aggregate(pipeline)
+
+final_data = []
+for result in results:
+    field_value = result['_id']
+    count = result['count']
+    final_data.append({field_value: count})
+
+import json
+with open('count.json', 'w') as f:
+    json.dump(final_data, f)
+
 # gse_id_list_sub = list(geo_mongo_instance.series_metadata_collection.find(
 #     {}, projection={"_id": False, 
 #                     "Series_title": False, 
