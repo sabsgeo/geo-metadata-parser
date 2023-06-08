@@ -22,6 +22,8 @@ def __add_series_metadata_to_mongo(all_params):
                 updated_data)
 
 # Function that adds data
+
+
 def add_series_metadata(number_of_process, min_memory, shuffle):
     diff_list = general_helper.get_diff_between_all_geo_series_and_series_metadata()
     parallel_runner.add_data_in_parallel(
@@ -81,11 +83,24 @@ def __check_sample_level_validity(all_params):
 
 
 def validate_sample(number_of_process, min_memory, shuffle):
+    get_non_status_entry = {"$and": [{"sample_status": {
+        "$not": {"$eq": "invalid"}}}, {"sample_status": {"$not": {"$eq": "valid"}}}]}
+    pipeline = [
+        {"$group": {"_id": "$gse_id", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}}
+    ]
+
     geo_mongo_instance = geo_mongo.GeoMongo()
     gse_id_list = list(geo_mongo_instance.all_geo_series_collection.find(
-        {"sample_status": {"$not": {"$eq": "invalid"}}}, projection={"_id": False, "gse_patten": False, "last_updated": False, "status": False}))
-    f = open('count2.json')
-    all_sample_from_db = json.load(f)
+        get_non_status_entry, projection={"_id": False, "gse_patten": False, "last_updated": False, "status": False}))
+    
+    results = geo_mongo_instance.sample_metadata_collection.aggregate(pipeline)
+
+    all_sample_from_db = {}
+    for result in results:
+        all_sample_from_db[result['_id']] = result['count']
+
+    print("Remaining to update the status" + str(len(gse_id_list)))
 
     parallel_runner.add_data_in_parallel(__check_sample_level_validity, {
                                          "list_to_parallel": gse_id_list, "db_sample_count": all_sample_from_db}, number_of_process, min_memory, shuffle)

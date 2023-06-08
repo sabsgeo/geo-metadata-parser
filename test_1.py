@@ -16,11 +16,9 @@ pipeline = [
 # Execute the aggregation pipeline
 results = geo_mongo_instance.sample_metadata_collection.aggregate(pipeline)
 
-final_data = []
+final_data = {}
 for result in results:
-    field_value = result['_id']
-    count = result['count']
-    final_data.append({field_value: count})
+    final_data[result['_id']] = result['count']
 
 import json
 with open('count.json', 'w') as f:
