@@ -1,14 +1,9 @@
 import json
-
-f = open('count.json')
-all_sample_from_db = json.load(f)
-final_dct = {}
-for k in all_sample_from_db:
-    key = list(k.keys())[0]
-    final_dct[key] = k.get(key)
-
-with open('count2.json', 'w') as f:
-    json.dump(final_dct, f)
+from geo import geo_mongo
 
 
+geo_mongo_instance = geo_mongo.GeoMongo()
+gse_id_list = list(geo_mongo_instance.all_geo_series_collection.find(
+    {"sample_status": {"$not": {"$eq": "invalid"}}}, projection={"_id": False, "gse_patten": False, "last_updated": False, "status": False}))
 
+print(list(gse_id_list))

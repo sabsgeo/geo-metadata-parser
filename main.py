@@ -65,17 +65,25 @@ def add_sample_metadata(number_of_process, min_memory, shuffle):
 def __check_sample_level_validity(all_params):
     gse_id_list = all_params.get("list_to_parallel")
     db_sample_count = all_params.get("db_sample_count")
+    geo_mongo_instance = geo_mongo.GeoMongo()
+
     for gse_id in gse_id_list:
-        number_samples_from_geo = len(geo.get_samples_ids(gse_id.get("gse_id")))
+        number_samples_from_geo = len(
+            geo.get_samples_ids(gse_id.get("gse_id")))
         number_samples_from_db = db_sample_count.get(gse_id.get("gse_id"))
-        if not(number_samples_from_geo == number_samples_from_db):
+        sample_status = "valid"
+        if not (number_samples_from_geo == number_samples_from_db):
+            sample_status = "invalid"
             print("There is a sample number mismatch for " + gse_id.get("gse_id"))
+
+        geo_mongo_instance.all_geo_series_collection.update_one({"_id": gse_id.get(
+            "gse_id")},  {"$set": {"sample_status": sample_status}}, upsert=True)
 
 
 def validate_sample(number_of_process, min_memory, shuffle):
     geo_mongo_instance = geo_mongo.GeoMongo()
     gse_id_list = list(geo_mongo_instance.all_geo_series_collection.find(
-        {}, projection={"_id": False, "gse_patten": False, "last_updated": False, "status": False}))
+        {"sample_status": {"$not": {"$eq": "invalid"}}}, projection={"_id": False, "gse_patten": False, "last_updated": False, "status": False}))
     f = open('count2.json')
     all_sample_from_db = json.load(f)
 
