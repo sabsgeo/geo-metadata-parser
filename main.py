@@ -76,7 +76,7 @@ def validate_sample(number_of_process, min_memory, shuffle):
     geo_mongo_instance = geo_mongo.GeoMongo()
     gse_id_list = list(geo_mongo_instance.all_geo_series_collection.find(
         {}, projection={"_id": False, "gse_patten": False, "last_updated": False, "status": False}))
-    f = open('count.json')
+    f = open('count2.json')
     all_sample_from_db = json.load(f)
 
     parallel_runner.add_data_in_parallel(__check_sample_level_validity, {
