@@ -70,8 +70,13 @@ def __check_sample_level_validity(all_params):
     geo_mongo_instance = geo_mongo.GeoMongo()
 
     for gse_id in gse_id_list:
-        number_samples_from_geo = len(
-            geo.get_samples_ids(gse_id.get("gse_id")))
+        samples = geo.get_samples_ids(gse_id.get("gse_id"))
+        
+        if len(samples) == 1 and samples[0] == -1:
+            print("Not checking for samples from id " + gse_id.get("gse_id"))
+            continue
+
+        number_samples_from_geo = len(samples)
         number_samples_from_db = db_sample_count.get(gse_id.get("gse_id"))
         sample_status = "valid"
         if not (number_samples_from_geo == number_samples_from_db):

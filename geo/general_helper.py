@@ -73,7 +73,7 @@ def get_diff_between_geo_and_all_geo_series_sync_info(gse_pattern_list):
             if geo.has_soft_file(gse_id['gse_id']):
                 selected_one = geo_mongo_instance.all_geo_series_collection.find_one(
                     {"_id": gse_id.get('gse_id')})
-                last_updated_date = geo.read_series_metadata_from_soft_file(gse_id.get(
+                last_updated_date = geo.get_series_metadata_from_soft_file(gse_id.get(
                     'gse_id')).get("SERIES").get(gse_id.get('gse_id')).get("Series_last_update_date")
                 if selected_one == None:
                     data_to_add = {

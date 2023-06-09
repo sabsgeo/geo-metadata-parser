@@ -167,7 +167,7 @@ def parse_soft_file(decompressed_data):
                         final_parse[what_is_parsed][what_is_parsed_value][data_key] = data_value
     return final_parse
 
-def read_series_metadata_from_soft_file(gse_id):
+def get_series_metadata_from_soft_file(gse_id):
     decompressed_data = ""
     url = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=" + gse_id + "&targ=self&form=text&view=brief"
 
@@ -181,8 +181,14 @@ def read_series_metadata_from_soft_file(gse_id):
     return parse_soft_file(decompressed_data)
 
 def get_samples_ids(gse_id):
-   data_model = model_data.ModelData()
-   return data_model.soft_data_type_to_list(read_series_metadata_from_soft_file(gse_id).get("SERIES").get(gse_id), "Series_sample_id")
+    data_model = model_data.ModelData()
+    samples = [-1]
+    try:
+        samples = data_model.soft_data_type_to_list(get_series_metadata_from_soft_file(gse_id).get("SERIES").get(gse_id), "Series_sample_id")
+    except Exception as err:
+        print("GSE ID " + gse_id + " seems to be private")
+    
+    return samples
 
 def read_full_soft_file(gse_id):
     compressed_data = ""
