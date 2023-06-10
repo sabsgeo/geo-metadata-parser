@@ -88,8 +88,8 @@ def __check_sample_level_validity(all_params):
 
 
 def validate_sample(number_of_process, min_memory, shuffle):
-    get_non_status_entry = {"$and": [{"sample_status": {
-        "$not": {"$eq": "invalid"}}}, {"sample_status": {"$not": {"$eq": "valid"}}}]}
+    # get_non_status_entry = {"$and": [{"sample_status": {
+    #     "$not": {"$eq": "invalid"}}}, {"sample_status": {"$not": {"$eq": "valid"}}}]}
     pipeline = [
         {"$group": {"_id": "$gse_id", "count": {"$sum": 1}}},
         {"$sort": {"count": -1}}
@@ -97,7 +97,7 @@ def validate_sample(number_of_process, min_memory, shuffle):
 
     geo_mongo_instance = geo_mongo.GeoMongo()
     gse_id_list = list(geo_mongo_instance.series_metadata_collection.find(
-        get_non_status_entry, projection={
+        {}, projection={
                 "_id": False,
                 "Series_title": False,
                 "Series_status": False,
@@ -130,18 +130,11 @@ def validate_sample(number_of_process, min_memory, shuffle):
 
         if not (number_samples_from_geo == number_samples_from_db):
             sample_status = "invalid"
-            print("There is a sample number mismatch for " + gse_id.get("gse_id"))
+            print("There is a sample number mismatch of " + str(number_samples_from_geo)+ "--" + str(number_samples_from_db) + ' '+ gse_id.get("gse_id"))
 
         oper.append(UpdateOne({"_id": gse_id.get("gse_id")}, {"$set": {"sample_status": sample_status}}))
 
     geo_mongo_instance.all_geo_series_collection.bulk_write(oper, ordered=False)
-
-            # geo_mongo_instance.all_geo_series_collection.update_one({"_id": gse_id.get(
-        #     "gse_id")},  {"$set": {"sample_status": sample_status}}, upsert=True)
-    # print("Remaining to update the status" + str(len(gse_id_list)))
-
-    # parallel_runner.add_data_in_parallel(__check_sample_level_validity, {
-    #                                      "list_to_parallel": gse_id_list, "db_sample_count": all_sample_from_db}, number_of_process, min_memory, shuffle)
 
 def __add_series_and_sample_metadata(all_params):
     list_to_add = all_params.get("list_to_parallel")

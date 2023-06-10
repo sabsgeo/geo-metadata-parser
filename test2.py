@@ -8,9 +8,11 @@ import re
 import json
 from pymongo import MongoClient, InsertOne, DeleteOne, ReplaceOne, UpdateOne
 list_k = general_helper.series_to_update_or_add()
+for p in list_k:
+    print(p.get('gse_id'))
 print(len(list_k))
-inst = geo_mongo.GeoMongo()
-# for p in list_k:
+
+
 #     all_data_ = list(inst.sample_metadata_collection.find(
 #         {"gse_id": p.get('gse_id')}))
 #     print("===============")
