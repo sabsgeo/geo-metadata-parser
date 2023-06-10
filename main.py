@@ -133,9 +133,9 @@ def validate_sample(number_of_process, min_memory, shuffle):
             print("There is a sample number mismatch for " + gse_id.get("gse_id"))
             exit(0)
 
-        #oper.append(UpdateOne({"_id": gse_id.get("gse_id")}, {"$set": {"sample_status": sample_status}}))
+        oper.append(UpdateOne({"_id": gse_id.get("gse_id")}, {"$set": {"sample_status": sample_status}}))
 
-    # geo_mongo_instance.all_geo_series_collection.bulk_write(oper, ordered=False)
+    geo_mongo_instance.all_geo_series_collection.bulk_write(oper, ordered=False)
 
             # geo_mongo_instance.all_geo_series_collection.update_one({"_id": gse_id.get(
         #     "gse_id")},  {"$set": {"sample_status": sample_status}}, upsert=True)
