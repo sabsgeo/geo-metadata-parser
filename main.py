@@ -3,6 +3,8 @@ from geo import model_data
 from geo import parallel_runner
 from geo import general_helper
 from geo import geo
+from pymongo import UpdateOne
+
 
 import argparse
 import traceback
@@ -22,8 +24,6 @@ def __add_series_metadata_to_mongo(all_params):
                 updated_data)
 
 # Function that adds data
-
-
 def add_series_metadata(number_of_process, min_memory, shuffle):
     diff_list = general_helper.get_diff_between_all_geo_series_and_series_metadata()
     parallel_runner.add_data_in_parallel(
@@ -77,7 +77,7 @@ def __check_sample_level_validity(all_params):
             continue
 
         number_samples_from_geo = len(samples)
-        number_samples_from_db = db_sample_count.get(gse_id.get("gse_id"))
+        number_samples_from_db = db_sample_count.get(gse_id.get("gse_id"), 0)
         sample_status = "valid"
         if not (number_samples_from_geo == number_samples_from_db):
             sample_status = "invalid"
@@ -96,20 +96,72 @@ def validate_sample(number_of_process, min_memory, shuffle):
     ]
 
     geo_mongo_instance = geo_mongo.GeoMongo()
-    gse_id_list = list(geo_mongo_instance.all_geo_series_collection.find(
-        get_non_status_entry, projection={"_id": False, "gse_patten": False, "last_updated": False, "status": False}))
+    gse_id_list = list(geo_mongo_instance.series_metadata_collection.find(
+        get_non_status_entry, projection={
+                "_id": False,
+                "Series_title": False,
+                "Series_status": False,
+                "Series_pubmed_id": False,
+                "Series_web_link": False,
+                "Series_summary": False,
+                "Series_overall_design": False,
+                "Series_type": False,
+                "Series_contributor": False,
+                "Series_contact_institute": False,
+                "Series_supplementary_file": False,
+                "Series_platform_id": False,
+                "Series_relation": False,
+                "Platform_title": False,
+                "Platform_technology": False, 
+                "Platform_organism": False
+                }
+            ))
     
-    results = geo_mongo_instance.sample_metadata_collection.aggregate(pipeline)
+    count_details = geo_mongo_instance.sample_metadata_collection.aggregate(pipeline)
 
-    all_sample_from_db = {}
-    for result in results:
-        all_sample_from_db[result['_id']] = result['count']
+    sample_count_from_db = {}
+    for result in count_details:
+        sample_count_from_db[result['_id']] = result['count']
+    oper = []
+    for gse_id in gse_id_list:
+        number_samples_from_geo = len(gse_id.get("Series_sample_id"))
+        number_samples_from_db = sample_count_from_db.get(gse_id.get("gse_id"), 0)
+        sample_status = "valid"
 
-    print("Remaining to update the status" + str(len(gse_id_list)))
+        if not (number_samples_from_geo == number_samples_from_db):
+            sample_status = "invalid"
+            print("There is a sample number mismatch for " + gse_id.get("gse_id"))
+            exit(0)
 
-    parallel_runner.add_data_in_parallel(__check_sample_level_validity, {
-                                         "list_to_parallel": gse_id_list, "db_sample_count": all_sample_from_db}, number_of_process, min_memory, shuffle)
+        #oper.append(UpdateOne({"_id": gse_id.get("gse_id")}, {"$set": {"sample_status": sample_status}}))
 
+    # geo_mongo_instance.all_geo_series_collection.bulk_write(oper, ordered=False)
+
+            # geo_mongo_instance.all_geo_series_collection.update_one({"_id": gse_id.get(
+        #     "gse_id")},  {"$set": {"sample_status": sample_status}}, upsert=True)
+    # print("Remaining to update the status" + str(len(gse_id_list)))
+
+    # parallel_runner.add_data_in_parallel(__check_sample_level_validity, {
+    #                                      "list_to_parallel": gse_id_list, "db_sample_count": all_sample_from_db}, number_of_process, min_memory, shuffle)
+
+def __add_series_and_sample_metadata(all_params):
+    list_to_add = all_params.get("list_to_parallel")
+    data_model = model_data.ModelData()
+    count = 0
+    for gse_id in list_to_add:
+        count = count + 1
+        print(gse_id.get("gse_id"))
+        updated_data = data_model.extract_series_metadata_info_from_softfile(gse_id.get("gse_id"))
+        print(updated_data)
+        print(gse_id)
+        if count > 0:
+            exit(0)
+
+
+def add_update_metadata(number_of_process, min_memory, shuffle):
+    list_to_add = general_helper.series_to_update_or_add()
+    __add_series_and_sample_metadata( {"list_to_parallel": list_to_add})
+    # parallel_runner.add_data_in_parallel(__add_series_and_sample_metadata, {"list_to_parallel": list_to_add}, number_of_process, min_memory, shuffle)
 
 def main(function_call, process_number, min_memory, shuffle):
 
