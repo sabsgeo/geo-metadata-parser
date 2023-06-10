@@ -9,5 +9,5 @@ import json
 from pymongo import MongoClient, InsertOne, DeleteOne, ReplaceOne, UpdateOne
 
 inst = geo_mongo.GeoMongo()
-k = list(inst.sample_metadata_collection.find({"gse_id": "GSE221267"}))
-print(len(k))
+k = list(inst.sample_metadata_collection.find({"gse_id": "GSE230004"}))
+print(k)

@@ -150,6 +150,7 @@ def __add_series_and_sample_metadata(all_params):
     geo_instance = geo_mongo.GeoMongo()
 
     count = 0
+    list_to_add = [{"gse_id" : "GSE230004"}]
     for gse_id in list_to_add:
         count = count + 1
         updated_series_data, updated_sample_data = data_model.extract_all_metadata_info_from_softfile(

@@ -112,7 +112,7 @@ class ModelData():
                     for sample_keys in soft_file["SAMPLE"][sample_id].keys():
                         last_key = sample_keys.split(
                             "_")[-1]
-                        if "_ch" in last_key:
+                        if "characteristics_ch" in sample_keys:
                             channel_data[last_key][sample_keys] = self.soft_data_type_to_string(
                                 soft_file["SAMPLE"][sample_id], sample_keys)
 
