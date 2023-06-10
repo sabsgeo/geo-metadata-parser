@@ -131,7 +131,6 @@ def validate_sample(number_of_process, min_memory, shuffle):
         if not (number_samples_from_geo == number_samples_from_db):
             sample_status = "invalid"
             print("There is a sample number mismatch for " + gse_id.get("gse_id"))
-            exit(0)
 
         oper.append(UpdateOne({"_id": gse_id.get("gse_id")}, {"$set": {"sample_status": sample_status}}))
 
