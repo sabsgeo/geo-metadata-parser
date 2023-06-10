@@ -170,7 +170,7 @@ def __add_series_and_sample_metadata(all_params):
 
 def add_update_metadata(number_of_process, min_memory, shuffle):
     list_to_add = general_helper.series_to_update_or_add()
-    print("Number of data to be updated/added: " + len(list_to_add))
+    print("Number of data to be updated/added: " + str(len(list_to_add)))
     parallel_runner.add_data_in_parallel(__add_series_and_sample_metadata, {"list_to_parallel": list_to_add}, number_of_process, min_memory, shuffle)
 
 
