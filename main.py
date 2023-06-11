@@ -65,9 +65,9 @@ def __add_geo_sync_info_to_mongo(all_params):
         oper = []
         for gse in data_to_add:
             del gse["_id"]
-            oper.append(UpdateOne({"_id": gse.get("_id")}, {"$set": gse}, upsert= True))
+            oper.append(UpdateOne({"_id": gse.get("_id")}, {"$set": gse}, upsert=True))
         
-        geo_mongo_instance.all_geo_series_collection.bulk_write(oper)
+        geo_mongo_instance.all_geo_series_collection.bulk_write(oper, ordered=False)
         exit(0)
         
 
