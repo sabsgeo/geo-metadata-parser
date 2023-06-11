@@ -171,8 +171,8 @@ def __add_series_and_sample_metadata(all_params):
                 del each_sample["_id"]
                 oper.append(UpdateOne({"_id": sample_id}, {
                             "$set": each_sample}, upsert=True))
-
-            geo_instance.sample_metadata_collection.bulk_write(oper, ordered=False)
+            if len(oper) > 0:
+                geo_instance.sample_metadata_collection.bulk_write(oper, ordered=False)
 
             # update status
             geo_instance.all_geo_series_collection.update_one({"_id": gse_id.get(
