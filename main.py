@@ -150,18 +150,15 @@ def __add_series_and_sample_metadata(all_params):
     geo_instance = geo_mongo.GeoMongo()
 
     for gse_id in list_to_add:
-        print("Started adding " + gse_id.get("gse_id"))
-        start_time = time.time()
+        print("Started adding/updating " + gse_id.get("gse_id"))
         updated_series_data, updated_sample_data = data_model.extract_all_metadata_info_from_softfile(
             gse_id.get("gse_id"))
-        extract_time = time.time()
 
         # update series
         series_id = updated_series_data.get("_id")
         del updated_series_data["_id"]
         geo_instance.series_metadata_collection.update_one(
             {"_id": series_id}, {"$set": updated_series_data}, upsert=True)
-        series_insert_time = time.time()
 
         oper = []
         for each_sample in updated_sample_data:
@@ -171,28 +168,17 @@ def __add_series_and_sample_metadata(all_params):
                         "$set": each_sample}, upsert=True))
 
         geo_instance.sample_metadata_collection.bulk_write(oper)
-        sample_insert_time = time.time()
 
         # update status
         geo_instance.all_geo_series_collection.update_one({"_id": gse_id.get(
             "gse_id")}, {"$set": {"status": "up_to_date", "sample_status": "valid"}}, upsert=True)
-        update_db = time.time()
-        extract = extract_time - start_time
-        series_add = series_insert_time - extract_time
-        sam_add = sample_insert_time - series_insert_time
-        db_up = update_db - sample_insert_time
-        tot_t = update_db - start_time
-        print("Time to add GSE_ID: {}, extract time {}, series add {}, sample add {}, db update {}".format(
-            str(tot_t), str(extract), str(series_add), str(sam_add), str(db_up)))
-        exit(0)
 
 
 def add_update_metadata(number_of_process, min_memory, shuffle):
     list_to_add = general_helper.series_to_update_or_add()
     print("Number of data to be updated/added: " + str(len(list_to_add)))
-    __add_series_and_sample_metadata({"list_to_parallel": list_to_add})
-    # parallel_runner.add_data_in_parallel(__add_series_and_sample_metadata, {
-    #                                      "list_to_parallel": list_to_add}, number_of_process, min_memory, shuffle)
+    parallel_runner.add_data_in_parallel(__add_series_and_sample_metadata, {
+                                         "list_to_parallel": list_to_add}, number_of_process, min_memory, shuffle)
 
 
 def main(function_call, process_number, min_memory, shuffle):
