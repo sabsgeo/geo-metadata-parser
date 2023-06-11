@@ -136,6 +136,9 @@ def validate_sample(number_of_process, min_memory, shuffle):
         sample_status = "valid"
 
         if not (number_samples_from_geo == number_samples_from_db):
+            status = geo_mongo_instance.all_geo_series_collection.find_one({"_id": gse_id.get("gse_id")}).get("status")
+            if status == "private":
+                continue
             sample_status = "invalid"
             print("There is a sample number mismatch of " + str(number_samples_from_geo) +
                   "--" + str(number_samples_from_db) + ' ' + gse_id.get("gse_id"))
