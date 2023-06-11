@@ -3,8 +3,6 @@ from pymongo.server_api import ServerApi
 import pandas as pd
 
 import traceback
-import json
-import ast
 
 
 class GeoMongo():

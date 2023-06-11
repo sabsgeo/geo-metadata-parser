@@ -1,7 +1,5 @@
 from geo import geo
 
-import itertools
-import ast
 import traceback
 
 

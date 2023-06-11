@@ -67,16 +67,20 @@ def __add_geo_sync_info_to_mongo(all_params):
         add_oper = []
         update_oper = []
         for add_gse in data_to_add:
-            add_oper.append(UpdateOne({"_id": add_gse.get("_id")}, {"$set": add_gse}, upsert=True))
-        
+            add_oper.append(UpdateOne({"_id": add_gse.get("_id")}, {
+                            "$set": add_gse}, upsert=True))
+
         for update_gse in data_to_update:
-            update_oper.append(UpdateOne({"_id": update_gse.get("_id")}, {"$set": update_gse}, upsert=True))
+            update_oper.append(UpdateOne({"_id": update_gse.get("_id")}, {
+                               "$set": update_gse}, upsert=True))
 
         if len(add_oper) > 0:
-            geo_mongo_instance.all_geo_series_collection.bulk_write(add_oper, ordered=False)
-        
+            geo_mongo_instance.all_geo_series_collection.bulk_write(
+                add_oper, ordered=False)
+
         if len(update_oper) > 0:
-            geo_mongo_instance.all_geo_series_collection.bulk_write(update_oper, ordered=False)
+            geo_mongo_instance.all_geo_series_collection.bulk_write(
+                update_oper, ordered=False)
 
 
 def sync_status_from_geo(number_of_process, min_memory, shuffle=False):
@@ -88,10 +92,8 @@ def sync_status_from_geo(number_of_process, min_memory, shuffle=False):
     for gse_id in get_gse_status:
         final_get_gse_status[gse_id.get("_id")] = gse_id
 
-    __add_geo_sync_info_to_mongo(
-        {"list_to_parallel": series_pattern, "get_gse_status": final_get_gse_status})
-    # parallel_runner.add_data_in_parallel(
-    #    __add_geo_sync_info_to_mongo, {"list_to_parallel": series_pattern, "get_gse_status": final_get_gse_status}, number_of_process, min_memory, shuffle)
+    parallel_runner.add_data_in_parallel(
+        __add_geo_sync_info_to_mongo, {"list_to_parallel": series_pattern, "get_gse_status": final_get_gse_status}, number_of_process, min_memory, shuffle)
 
 
 def validate_sample():
