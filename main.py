@@ -158,24 +158,27 @@ def __add_series_and_sample_metadata(all_params):
         updated_series_data, updated_sample_data = data_model.extract_all_metadata_info_from_softfile(
             gse_id.get("gse_id"))
 
-        # update series
-        series_id = updated_series_data.get("_id")
-        del updated_series_data["_id"]
-        geo_instance.series_metadata_collection.update_one(
-            {"_id": series_id}, {"$set": updated_series_data}, upsert=True)
+        if bool(updated_series_data):
+            # update series
+            series_id = updated_series_data.get("_id")
+            del updated_series_data["_id"]
+            geo_instance.series_metadata_collection.update_one(
+                {"_id": series_id}, {"$set": updated_series_data}, upsert=True)
 
-        oper = []
-        for each_sample in updated_sample_data:
-            sample_id = each_sample.get("_id")
-            del each_sample["_id"]
-            oper.append(UpdateOne({"_id": sample_id}, {
-                        "$set": each_sample}, upsert=True))
+            oper = []
+            for each_sample in updated_sample_data:
+                sample_id = each_sample.get("_id")
+                del each_sample["_id"]
+                oper.append(UpdateOne({"_id": sample_id}, {
+                            "$set": each_sample}, upsert=True))
 
-        geo_instance.sample_metadata_collection.bulk_write(oper, ordered=False)
+            geo_instance.sample_metadata_collection.bulk_write(oper, ordered=False)
 
-        # update status
-        geo_instance.all_geo_series_collection.update_one({"_id": gse_id.get(
-            "gse_id")}, {"$set": {"status": "up_to_date", "sample_status": "valid"}}, upsert=True)
+            # update status
+            geo_instance.all_geo_series_collection.update_one({"_id": gse_id.get(
+                "gse_id")}, {"$set": {"status": "up_to_date", "sample_status": "valid"}}, upsert=True)
+        else:
+            print("GSE ID {} is probably private".format(gse_id.get("gse_id")))
 
 
 def add_update_metadata(number_of_process, min_memory, shuffle):
