@@ -33,7 +33,11 @@ def __get_diff_between_geo_and_all_geo_series_sync_info(gse_pattern_list, get_gs
                     print("GSE ID has to be added: " +
                           gse_id.get('gse_id'))
                 elif not (selected_one.get("last_updated") == last_updated_date):
-                    update_to_add = {"status": "not_up_to_date", "last_updated": last_updated_date}
+                    update_to_add = {
+                        "_id": gse_id.get('gse_id'),
+                        "status": "not_up_to_date",
+                        "last_updated": last_updated_date
+                    }
                     all_series_data_to_update.append(update_to_add)
                     print("GSE ID has to be updated: " +
                           gse_id.get('gse_id'))
