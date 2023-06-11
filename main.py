@@ -16,7 +16,7 @@ def __add_geo_sync_info_to_mongo(all_params):
         sub_series_pattern, get_gse_status)
 
 
-def sync_metadata_status_from_geo(number_of_process, min_memory, shuffle=False):
+def sync_status_from_geo(number_of_process, min_memory, shuffle=False):
     geo_mongo_instance = geo_mongo.GeoMongo()
     series_pattern = geo.get_series_parrerns_for_geo()
     get_gse_status = list(
