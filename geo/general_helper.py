@@ -10,13 +10,6 @@ def series_to_update_or_add():
     return gse_id_list
 
 
-def series_to_invistigate():
-    geo_mongo_instance = geo_mongo.GeoMongo()
-    gse_id_list = list(geo_mongo_instance.all_geo_series_collection.find(
-        {"status": "need_investination"}))
-    return gse_id_list
-
-
 def get_diff_between_all_geo_series_and_series_metadata():
     geo_mongo_instance = geo_mongo.GeoMongo()
     gse_id_list = list(geo_mongo_instance.all_geo_series_collection.find(

@@ -101,25 +101,6 @@ def has_soft_file(gse_id):
         else:
             return False
 
-def get_gse_with_soft(gse_ids):
-    # final_result = []
-    for gse_id in gse_ids:
-        id = int(int(re.findall(r'\d+', gse_id['gse_id'])[0]) / 1000)
-        url = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE" + \
-            str(id) + "nnn/" + gse_id['gse_id'] + "/"
-        response = requests.get(url)
-
-        # Parse the HTML content using BeautifulSoup
-        soup = BeautifulSoup(response.content, "html.parser")
-
-        # Find all the links (directories) on the page
-
-        # Getting the date from the list
-        links = str(soup.find_all("pre")[0])
-        if re.search("soft", links):
-            # final_result.append(gse_id)
-            yield gse_id
-
 def parse_soft_file(decompressed_data):
     # Load the decompressed data into an IO stream
     stream = ""
