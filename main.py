@@ -52,7 +52,8 @@ def __get_diff_between_geo_and_all_geo_series_sync_info(gse_pattern_list, get_gs
                 print("GSE ID is private: " +
                       gse_id.get('gse_id'))
                 exit(0)
-        yield all_series_data_to_add, all_series_data_to_update
+        if len(all_series_data_to_add) > 0 or len(all_series_data_to_update) > 0:
+            yield all_series_data_to_add, all_series_data_to_update
 
 
 def __add_geo_sync_info_to_mongo(all_params):
@@ -67,7 +68,8 @@ def __add_geo_sync_info_to_mongo(all_params):
         for gse in data_to_add:
             oper.append(UpdateOne({"_id": gse.get("_id")}, {"$set": gse}, upsert=True))
         
-        geo_mongo_instance.all_geo_series_collection.bulk_write(oper, ordered=False)
+        if len(oper) > 0:
+            geo_mongo_instance.all_geo_series_collection.bulk_write(oper, ordered=False)
         exit(0)
 
 
