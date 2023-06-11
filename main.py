@@ -14,7 +14,6 @@ def __get_diff_between_geo_and_all_geo_series_sync_info(gse_pattern_list, get_gs
         all_series_data_to_add = []
         all_series_data_to_update = []
         for gse_id in gse_ids:
-            print(gse_id['gse_id'])
             if geo.has_soft_file(gse_id['gse_id']):
                 selected_one = get_gse_status.get(gse_id['gse_id'])
                 last_updated_date = geo.get_series_metadata_from_soft_file(gse_id.get(
@@ -54,7 +53,6 @@ def __get_diff_between_geo_and_all_geo_series_sync_info(gse_pattern_list, get_gs
                 all_series_data_to_add.append(update_to_add)
                 print("GSE ID is private: " +
                       gse_id.get('gse_id'))
-                exit(0)
         if len(all_series_data_to_add) > 0 or len(all_series_data_to_update) > 0:
             yield all_series_data_to_add, all_series_data_to_update
 
@@ -68,7 +66,6 @@ def __add_geo_sync_info_to_mongo(all_params):
     for data_to_add, data_to_update in sync_iter:
         add_oper = []
         update_oper = []
-        print(data_to_update)
         for add_gse in data_to_add:
             add_oper.append(UpdateOne({"_id": add_gse.get("_id")}, {"$set": add_gse}, upsert=True))
         
@@ -80,7 +77,6 @@ def __add_geo_sync_info_to_mongo(all_params):
         
         if len(update_oper) > 0:
             geo_mongo_instance.all_geo_series_collection.bulk_write(update_oper, ordered=False)
-        exit(0)
 
 
 def sync_status_from_geo(number_of_process, min_memory, shuffle=False):
