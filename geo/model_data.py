@@ -31,6 +31,9 @@ class ModelData():
 
     def extract_all_metadata_info_from_softfile(self, gse_id):
         soft_file = {}
+        series_metadata = {}
+        all_sample_data = []
+        
         try:
             soft_file = geo.read_full_soft_file(gse_id)
         except Exception as err:
@@ -38,9 +41,8 @@ class ModelData():
             print(traceback.format_exc())
 
         if not (bool(soft_file)):
-            return {}
+            return series_metadata, all_sample_data
     
-        series_metadata = {}
 
         if "SERIES" in soft_file:
             series_metadata = {
@@ -77,7 +79,6 @@ class ModelData():
             series_metadata["Platform_technology"] = []
             series_metadata["Platform_title"] = []
 
-        all_sample_data = []
         # Sample data collection
         if "SAMPLE" in soft_file:
             for sample_id in soft_file["SAMPLE"].keys():
