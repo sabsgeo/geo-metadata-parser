@@ -33,12 +33,10 @@ def __get_diff_between_geo_and_all_geo_series_sync_info(gse_pattern_list, get_gs
                     print("GSE ID has to be added: " +
                           gse_id.get('gse_id'))
                 elif not (selected_one.get("last_updated") == last_updated_date):
-                    update_to_add = {"status": "not_up_to_date"}
+                    update_to_add = {"status": "not_up_to_date", "last_updated": last_updated_date}
                     all_series_data_to_update.append(update_to_add)
-                    print(gse_id)
                     print("GSE ID has to be updated: " +
                           gse_id.get('gse_id'))
-                    exit(0)
             else:
                 data_to_add = {
                     "_id": gse_id.get('gse_id'),
@@ -64,13 +62,20 @@ def __add_geo_sync_info_to_mongo(all_params):
     sync_iter = __get_diff_between_geo_and_all_geo_series_sync_info(
         sub_series_pattern, get_gse_status)
     for data_to_add, data_to_update in sync_iter:
-        oper = []
+        add_oper = []
+        update_oper = []
         print(data_to_update)
-        for gse in data_to_add:
-            oper.append(UpdateOne({"_id": gse.get("_id")}, {"$set": gse}, upsert=True))
+        for add_gse in data_to_add:
+            add_oper.append(UpdateOne({"_id": add_gse.get("_id")}, {"$set": add_gse}, upsert=True))
         
-        if len(oper) > 0:
-            geo_mongo_instance.all_geo_series_collection.bulk_write(oper, ordered=False)
+        for update_gse in data_to_update:
+            update_oper.append(UpdateOne({"_id": update_gse.get("_id")}, {"$set": update_gse}, upsert=True))
+
+        if len(add_oper) > 0:
+            geo_mongo_instance.all_geo_series_collection.bulk_write(add_oper, ordered=False)
+        
+        if len(update_oper) > 0:
+            geo_mongo_instance.all_geo_series_collection.bulk_write(update_oper, ordered=False)
         exit(0)
 
 
