@@ -63,13 +63,12 @@ def __add_geo_sync_info_to_mongo(all_params):
         sub_series_pattern, get_gse_status)
     for data_to_add, data_to_update in sync_iter:
         oper = []
+        print(data_to_update)
         for gse in data_to_add:
             oper.append(UpdateOne({"_id": gse.get("_id")}, {"$set": gse}, upsert=True))
         
         geo_mongo_instance.all_geo_series_collection.bulk_write(oper, ordered=False)
         exit(0)
-        
-
 
 
 def sync_status_from_geo(number_of_process, min_memory, shuffle=False):
@@ -161,14 +160,12 @@ def __add_series_and_sample_metadata(all_params):
         if bool(updated_series_data):
             # update series
             series_id = updated_series_data.get("_id")
-            del updated_series_data["_id"]
             geo_instance.series_metadata_collection.update_one(
                 {"_id": series_id}, {"$set": updated_series_data}, upsert=True)
 
             oper = []
             for each_sample in updated_sample_data:
                 sample_id = each_sample.get("_id")
-                del each_sample["_id"]
                 oper.append(UpdateOne({"_id": sample_id}, {
                             "$set": each_sample}, upsert=True))
             if len(oper) > 0:
