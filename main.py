@@ -98,6 +98,7 @@ def validate_sample(number_of_process, min_memory, shuffle):
     ]
 
     geo_mongo_instance = geo_mongo.GeoMongo()
+    print("Getting all series metadata")
     gse_id_list = list(geo_mongo_instance.series_metadata_collection.find(
         {}, projection={
             "_id": False,
@@ -118,13 +119,15 @@ def validate_sample(number_of_process, min_memory, shuffle):
             "Platform_organism": False
         }
     ))
-
+    print("Getting sample level count")
     count_details = geo_mongo_instance.sample_metadata_collection.aggregate(
         pipeline)
 
     sample_count_from_db = {}
     for result in count_details:
         sample_count_from_db[result['_id']] = result['count']
+    
+    print("Going to update db")
     oper = []
     for gse_id in gse_id_list:
         number_samples_from_geo = len(gse_id.get("Series_sample_id"))
@@ -142,6 +145,7 @@ def validate_sample(number_of_process, min_memory, shuffle):
 
     geo_mongo_instance.all_geo_series_collection.bulk_write(
         oper, ordered=False)
+    print("Update complete")
 
 
 def __add_series_and_sample_metadata(all_params):
@@ -167,7 +171,7 @@ def __add_series_and_sample_metadata(all_params):
             oper.append(UpdateOne({"_id": sample_id}, {
                         "$set": each_sample}, upsert=True))
 
-        geo_instance.sample_metadata_collection.bulk_write(oper)
+        geo_instance.sample_metadata_collection.bulk_write(oper, ordered=False)
 
         # update status
         geo_instance.all_geo_series_collection.update_one({"_id": gse_id.get(
