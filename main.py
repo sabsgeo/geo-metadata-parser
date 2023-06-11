@@ -14,6 +14,7 @@ def __get_diff_between_geo_and_all_geo_series_sync_info(gse_pattern_list, get_gs
         all_series_data_to_add = []
         all_series_data_to_update = []
         for gse_id in gse_ids:
+            print(gse_id['gse_id'])
             if geo.has_soft_file(gse_id['gse_id']):
                 selected_one = get_gse_status.get(gse_id['gse_id'])
                 last_updated_date = geo.get_series_metadata_from_soft_file(gse_id.get(
