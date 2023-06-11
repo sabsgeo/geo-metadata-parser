@@ -181,7 +181,7 @@ def __add_series_and_sample_metadata(all_params):
         db_up = update_db - sample_insert_time
         tot_t = update_db - start_time
         print("Time to add GSE_ID: {}, extract time {}, series del {}, series add {}, sample del {}, sample add {}, db update {}".format(
-            tot_t, extract, series_del, series_add, samp_del, sam_add, db_up))
+            str(tot_t), str(extract), str(series_del), str(series_add), str(samp_del), str(sam_add), str(db_up)))
 
 
 def add_update_metadata(number_of_process, min_memory, shuffle):
