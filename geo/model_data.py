@@ -103,17 +103,20 @@ class ModelData():
                 }
 
                 if "Sample_channel_count" in soft_file["SAMPLE"][sample_id]:
+                    channel_array = []
                     for channel_count in range(int(soft_file["SAMPLE"][sample_id]["Sample_channel_count"])):
                         updated_channel_count = channel_count + 1
                         channel_key = "ch" + \
                             str(updated_channel_count)
+                        channel_array.append(channel_key)
                         if not (channel_key in channel_data.keys()):
                             channel_data[channel_key] = {}
-
+                    channel_array = list(set(channel_array))
                     for sample_keys in soft_file["SAMPLE"][sample_id].keys():
                         last_key = sample_keys.split(
                             "_")[-1]
-                        if "characteristics_ch" in sample_keys:
+                        ch_match = [s for s in channel_array if  s in sample_keys]
+                        if len(ch_match) > 0:
                             channel_data[last_key][sample_keys] = self.soft_data_type_to_string(
                                 soft_file["SAMPLE"][sample_id], sample_keys)
 
