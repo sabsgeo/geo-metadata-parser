@@ -159,15 +159,17 @@ def __add_series_and_sample_metadata(all_params):
         # update series
         series_id = updated_series_data.get("_id")
         del updated_series_data["_id"]
-        geo_instance.series_metadata_collection.update_one({"_id": series_id}, updated_series_data, upsert=True)
+        geo_instance.series_metadata_collection.update_one(
+            {"_id": series_id}, {"$set": updated_series_data}, upsert=True)
         series_insert_time = time.time()
 
         oper = []
         for each_sample in updated_sample_data:
             sample_id = each_sample.get("_id")
             del each_sample["_id"]
-            oper.append(UpdateOne({"_id": sample_id}, each_sample, upsert= True))
-        
+            oper.append(UpdateOne({"_id": sample_id}, {
+                        "$set": each_sample}, upsert=True))
+
         geo_instance.sample_metadata_collection.bulk_write(oper)
         sample_insert_time = time.time()
 
