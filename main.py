@@ -157,39 +157,40 @@ def __add_series_and_sample_metadata(all_params):
         extract_time = time.time()
 
         # update series
-        geo_instance.series_metadata_collection.delete_one(
-            {"_id": gse_id.get("gse_id")})
-        series_delete_time = time.time()
-        geo_instance.series_metadata_collection.insert_one(updated_series_data)
+        series_id = updated_series_data.get("_id")
+        del updated_series_data["_id"]
+        geo_instance.series_metadata_collection.update_one({"_id": series_id}, updated_series_data, upsert=True)
         series_insert_time = time.time()
 
-        # update sample
-        geo_instance.sample_metadata_collection.delete_many(
-            {"gse_id": gse_id.get("gse_id")})
-        sample_delete_time = time.time()
-        geo_instance.sample_metadata_collection.insert_many(
-            updated_sample_data, ordered=False)
+        oper = []
+        for each_sample in updated_sample_data:
+            sample_id = each_sample.get("_id")
+            del each_sample["_id"]
+            oper.append(UpdateOne({"_id": sample_id}, each_sample, upsert= True))
+        
+        geo_instance.sample_metadata_collection.bulk_write(oper)
         sample_insert_time = time.time()
+
         # update status
         geo_instance.all_geo_series_collection.update_one({"_id": gse_id.get(
             "gse_id")}, {"$set": {"status": "up_to_date", "sample_status": "valid"}}, upsert=True)
         update_db = time.time()
         extract = extract_time - start_time
-        series_del = series_delete_time - extract_time
-        series_add = series_insert_time - series_delete_time
-        samp_del = sample_delete_time - series_insert_time
-        sam_add = sample_insert_time - sample_delete_time
+        series_add = series_insert_time - extract_time
+        sam_add = sample_insert_time - series_insert_time
         db_up = update_db - sample_insert_time
         tot_t = update_db - start_time
-        print("Time to add GSE_ID: {}, extract time {}, series del {}, series add {}, sample del {}, sample add {}, db update {}".format(
-            str(tot_t), str(extract), str(series_del), str(series_add), str(samp_del), str(sam_add), str(db_up)))
+        print("Time to add GSE_ID: {}, extract time {}, series add {}, sample add {}, db update {}".format(
+            str(tot_t), str(extract), str(series_add), str(sam_add), str(db_up)))
+        exit(0)
 
 
 def add_update_metadata(number_of_process, min_memory, shuffle):
     list_to_add = general_helper.series_to_update_or_add()
     print("Number of data to be updated/added: " + str(len(list_to_add)))
-    parallel_runner.add_data_in_parallel(__add_series_and_sample_metadata, {
-                                         "list_to_parallel": list_to_add}, number_of_process, min_memory, shuffle)
+    __add_series_and_sample_metadata({"list_to_parallel": list_to_add})
+    # parallel_runner.add_data_in_parallel(__add_series_and_sample_metadata, {
+    #                                      "list_to_parallel": list_to_add}, number_of_process, min_memory, shuffle)
 
 
 def main(function_call, process_number, min_memory, shuffle):
