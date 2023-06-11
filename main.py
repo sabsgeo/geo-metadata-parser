@@ -7,22 +7,27 @@ from pymongo import UpdateOne
 
 import argparse
 import traceback
-import inspect
 
 
-# Step that can be made parallel for sync_metadata_status_from_geo
 def __add_geo_sync_info_to_mongo(all_params):
     sub_series_pattern = all_params.get("list_to_parallel")
+    get_gse_status = all_params.get("get_gse_status")
     general_helper.get_diff_between_geo_and_all_geo_series_sync_info(
-        sub_series_pattern)
-
-# Function that syncs status of updated data
+        sub_series_pattern, get_gse_status)
 
 
 def sync_metadata_status_from_geo(number_of_process, min_memory, shuffle=False):
+    geo_mongo_instance = geo_mongo.GeoMongo()
     series_pattern = geo.get_series_parrerns_for_geo()
-    parallel_runner.add_data_in_parallel(
-        __add_geo_sync_info_to_mongo, {"list_to_parallel": series_pattern}, number_of_process, min_memory, shuffle)
+    get_gse_status = list(
+        geo_mongo_instance.all_geo_series_collection.find({}))
+    final_get_gse_status = {}
+    for gse_id in get_gse_status:
+        final_get_gse_status[gse_id.get("_id")] = gse_id
+
+    __add_geo_sync_info_to_mongo({"list_to_parallel": series_pattern, "get_gse_status": final_get_gse_status})
+    #parallel_runner.add_data_in_parallel(
+    #    __add_geo_sync_info_to_mongo, {"list_to_parallel": series_pattern, "get_gse_status": final_get_gse_status}, number_of_process, min_memory, shuffle)
 
 
 def validate_sample():
@@ -121,13 +126,17 @@ def __add_series_and_sample_metadata(all_params):
 
 
 def add_update_metadata(number_of_process, min_memory, shuffle=False):
-    list_to_add = general_helper.series_to_update_or_add()
+    geo_mongo_instance = geo_mongo.GeoMongo()
+    list_to_add = list(geo_mongo_instance.all_geo_series_collection.find(
+        {"$or": [{"$and": [{"access": {"$eq": "public"}}, {"sample_status": {"$eq": "invalid"}}, {"status": {"$not": {"$eq": "need_investination"}}}]}, {"$and": [{"access": {"$eq": "public"}}, {"status": {"$eq": "not_up_to_date"}}]}]}))
+
     print("Number of data to be updated/added: " + str(len(list_to_add)))
+
     parallel_runner.add_data_in_parallel(__add_series_and_sample_metadata, {
                                          "list_to_parallel": list_to_add}, number_of_process, min_memory, shuffle)
 
 
-def main(function_call, process_number = None, min_memory = None, shuffle = None):
+def main(function_call, process_number=None, min_memory=None, shuffle=None):
 
     if function_call.startswith("__"):
         raise NotImplementedError("Method %s not callable" % function_call)
@@ -171,6 +180,6 @@ if __name__ == "__main__":
         args = parser.parse_args()
         process_number = int(args.process)
         min_memory = int(args.min_memory)
-        shuffle =  args.shuffle
+        shuffle = args.shuffle
 
     main(args.function, process_number, min_memory, shuffle)
