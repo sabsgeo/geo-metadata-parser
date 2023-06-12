@@ -50,7 +50,7 @@ def __get_diff_between_geo_and_all_geo_series_sync_info(gse_pattern_list, get_gs
                     "access": "private",
                     "sample_status": "valid"
                 }
-                all_series_data_to_add.append(update_to_add)
+                all_series_data_to_add.append(data_to_add)
                 print("GSE ID is private: " +
                       gse_id.get('gse_id'))
         if len(all_series_data_to_add) > 0 or len(all_series_data_to_update) > 0:
