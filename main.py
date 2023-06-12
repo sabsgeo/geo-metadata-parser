@@ -6,13 +6,17 @@ from pymongo import UpdateOne
 
 import argparse
 import traceback
+import time
+import inspect
 
 
 def __get_diff_between_geo_and_all_geo_series_sync_info(gse_pattern_list, get_gse_status):
+    time_to_sync_in_minutes = 2
     for each_pattern in gse_pattern_list:
         gse_ids = geo.get_gse_ids_from_pattern(each_pattern['gse_patten'])
         all_series_data_to_add = []
         all_series_data_to_update = []
+        start_time = time.time()
         for gse_id in gse_ids:
             if geo.has_soft_file(gse_id['gse_id']):
                 selected_one = get_gse_status.get(gse_id['gse_id'])
@@ -53,6 +57,14 @@ def __get_diff_between_geo_and_all_geo_series_sync_info(gse_pattern_list, get_gs
                 all_series_data_to_add.append(data_to_add)
                 print("GSE ID is private: " +
                       gse_id.get('gse_id'))
+            end_time = time.time()
+            if end_time - start_time > time_to_sync_in_minutes * 60:
+                if len(all_series_data_to_add) > 0 or len(all_series_data_to_update) > 0:
+                    yield all_series_data_to_add, all_series_data_to_update    
+                start_time = time.time()
+                all_series_data_to_add = []
+                all_series_data_to_update = []
+
         if len(all_series_data_to_add) > 0 or len(all_series_data_to_update) > 0:
             yield all_series_data_to_add, all_series_data_to_update
 
