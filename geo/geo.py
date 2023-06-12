@@ -7,7 +7,7 @@ import urllib.request
 import io
 import json
 import traceback
-
+import time
 
 def get_series_parrerns_for_geo():
     # URL to scrape
@@ -102,6 +102,8 @@ def has_soft_file(gse_id):
             return False
 
 def parse_soft_file(decompressed_data):
+    if decompressed_data == None:
+        return {}
     # Load the decompressed data into an IO stream
     stream = ""
     try:
@@ -149,30 +151,24 @@ def parse_soft_file(decompressed_data):
     return final_parse
 
 def get_series_metadata_from_soft_file(gse_id):
-    decompressed_data = ""
+    decompressed_data = None
     url = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=" + gse_id + "&targ=self&form=text&view=brief"
-
-    try:
-        with urllib.request.urlopen(url) as response:
-            decompressed_data = response.read()
-    except Exception as err:
-        print(traceback.format_exc())
-        print("Not able to parse " + gse_id)
+    number_of_retry = 3
+    retry_num = 0
+    while retry_num <= number_of_retry:
+        try:
+            with urllib.request.urlopen(url) as response:
+                decompressed_data = response.read()
+            retry_num = number_of_retry + 1
+        except Exception as err:
+            retry_num = retry_num + 1
+            print("Not able to parse " + gse_id + "going to retry")
+            time.sleep(5)
     
     return parse_soft_file(decompressed_data)
 
-def get_samples_ids(gse_id):
-    data_model = model_data.ModelData()
-    samples = [-1]
-    try:
-        samples = data_model.soft_data_type_to_list(get_series_metadata_from_soft_file(gse_id).get("SERIES").get(gse_id), "Series_sample_id")
-    except Exception as err:
-        print("GSE ID " + gse_id + " seems to be private")
-    
-    return samples
-
 def read_full_soft_file(gse_id):
-    compressed_data = ""
+    compressed_data = None
     try:
         url = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=" + gse_id + "&targ=all&form=text&view=brief"
         with urllib.request.urlopen(url) as response:

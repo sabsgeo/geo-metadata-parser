@@ -20,8 +20,12 @@ def __get_diff_between_geo_and_all_geo_series_sync_info(gse_pattern_list, get_gs
         for gse_id in gse_ids:
             if geo.has_soft_file(gse_id['gse_id']):
                 selected_one = get_gse_status.get(gse_id['gse_id'])
-                last_updated_date = geo.get_series_metadata_from_soft_file(gse_id.get(
-                    'gse_id')).get("SERIES").get(gse_id.get('gse_id')).get("Series_last_update_date")
+                series_data = geo.get_series_metadata_from_soft_file(gse_id.get('gse_id'))
+                last_updated_date = "-"
+                if "SERIES" in series_data:
+                    last_updated_date = series_data.get("SERIES").get(gse_id.get('gse_id')).get("Series_last_update_date")
+                else:
+                    continue
                 if selected_one == None:
                     data_to_add = {
                         "_id": gse_id.get('gse_id'),
