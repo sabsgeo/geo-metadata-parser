@@ -217,7 +217,7 @@ def add_update_metadata(number_of_process, min_memory, shuffle=False):
 
 
 def main(function_call, process_number=None, min_memory=None, shuffle=None):
-
+    wait_time_in_minutes = 5 
     if function_call.startswith("__"):
         raise NotImplementedError("Method %s not callable" % function_call)
 
@@ -236,6 +236,7 @@ def main(function_call, process_number=None, min_memory=None, shuffle=None):
                 method(process_number, min_memory, shuffle)
         except Exception as err:
             print(traceback.format_exc())
+        time.sleep( wait_time_in_minutes * 60 )
 
 
 if __name__ == "__main__":
