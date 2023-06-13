@@ -8,6 +8,7 @@ import argparse
 import traceback
 import time
 import inspect
+import re 
 
 
 def __get_diff_between_geo_and_all_geo_series_sync_info(gse_pattern_list, get_gse_status):
@@ -100,6 +101,21 @@ def __add_geo_sync_info_to_mongo(all_params):
 
 
 def sync_status_from_geo(number_of_process, min_memory, shuffle=False):
+    """
+    Synchronizes the data status of GEO to internal database.
+
+    Args:
+        number_of_process (int): The number of parallel processes to run.
+        min_memory (int): The minimum memory that shouuld be conserved in the system in which function runs.
+        shuffle (bool, optional): Flag indicating whether to shuffle the data. Defaults to False.
+
+    Returns:
+        None
+
+    Raises:
+        None
+
+    """
     geo_mongo_instance = geo_mongo.GeoMongo()
     series_pattern = geo.get_series_parrerns_for_geo()
     get_gse_status = list(
@@ -113,6 +129,19 @@ def sync_status_from_geo(number_of_process, min_memory, shuffle=False):
 
 
 def validate_sample():
+    """
+    Validates the sample level metadata in the internal database and updates the sample status accordingly.
+
+    Args:
+        None
+
+    Returns:
+        None
+
+    Raises:
+        None
+
+    """
     pipeline = [
         {"$group": {"_id": "$gse_id", "count": {"$sum": 1}}},
         {"$sort": {"count": -1}}
@@ -206,6 +235,21 @@ def __add_series_and_sample_metadata(all_params):
 
 
 def add_update_metadata(number_of_process, min_memory, shuffle=False):
+    """
+    Adds or updates metadata for GEO database to internal database.
+
+    Args:
+        number_of_process (int): The number of parallel processes to run.
+        min_memory (int): The minimum memory that should be conserved in the system in which function runs.
+        shuffle (bool, optional): Flag indicating whether to shuffle the data. Defaults to False.
+
+    Returns:
+        None
+
+    Raises:
+        None
+
+    """
     geo_mongo_instance = geo_mongo.GeoMongo()
     list_to_add = list(geo_mongo_instance.all_geo_series_collection.find(
         {"$or": [{"$and": [{"access": {"$eq": "public"}}, {"sample_status": {"$eq": "invalid"}}, {"status": {"$not": {"$eq": "need_investination"}}}]}, {"$and": [{"access": {"$eq": "public"}}, {"status": {"$eq": "not_up_to_date"}}]}]}))
@@ -215,6 +259,25 @@ def add_update_metadata(number_of_process, min_memory, shuffle=False):
     parallel_runner.add_data_in_parallel(__add_series_and_sample_metadata, {
                                          "list_to_parallel": list_to_add}, number_of_process, min_memory, shuffle)
 
+def __parse_arguments_from_docstring(func):
+    docstring = inspect.getdoc(func)
+    arg_pattern = r'\s+([\w_]+)\s*\(([^)]+)\):\s*([^:\n]+)'
+    type_pattern = r'([^:,]+)'
+    arg_matches = re.findall(arg_pattern, docstring)
+    arguments = {}
+    for arg_match in arg_matches:
+        arg_name = arg_match[0]
+        arg_type = ""
+
+        type_match = re.search(type_pattern, arg_match[1])
+        if type_match:
+            arg_type = type_match.group(1).strip()
+
+        arg_description = arg_match[2].strip()
+
+        arguments[arg_name] = {"type": arg_type, "description": arg_description}
+
+    return arguments
 
 def main(function_call, all_func_args):
     wait_time_in_minutes = 5 
@@ -250,14 +313,15 @@ if __name__ == "__main__":
 
     method = possibles.get(main_args.function)
     signature = inspect.signature(method)
+    parse_doc = __parse_arguments_from_docstring(method)
     for k, v in signature.parameters.items():
         if v.default is inspect.Parameter.empty:
-            parser.add_argument('--{}'.format(k), required=True)
+            parser.add_argument('--{}'.format(k), required=True, help=parse_doc.get(k).get("description"))
         else:
             if isinstance(v.default, bool):
-                parser.add_argument('--{}'.format(k), action=argparse.BooleanOptionalAction)
+                parser.add_argument('--{}'.format(k), action=argparse.BooleanOptionalAction, help=parse_doc.get(k).get("description"))
             else:
-                parser.add_argument('--{}'.format(k))
+                parser.add_argument('--{}'.format(k), help=parse_doc.get(k).get("description"))
             pos_arg = {k:v.default}
             parser.set_defaults(**pos_arg)
     args = parser.parse_args()
