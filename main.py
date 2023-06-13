@@ -186,5 +186,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     func_args = args.__dict__.copy()
     del func_args['function']
+    for val in parse_doc:
+        converted_val = eval("{}({})".format(parse_doc.get(val).get('type'), func_args.get(val)))
+        func_args[val] = converted_val
+    
     main(args.function, func_args)
 
