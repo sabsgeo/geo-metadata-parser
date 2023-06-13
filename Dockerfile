@@ -7,7 +7,7 @@ RUN pip install --upgrade pip
 RUN pip install -r /workspace/requirements.txt
 
 COPY geo /workspace/geo/
-COPY geo /workspace/helpers/
+COPY helpers /workspace/helpers/
 COPY main.py /workspace/
 COPY main.sh /workspace/
 RUN chmod +x /workspace/main.sh
