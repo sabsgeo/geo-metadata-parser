@@ -46,13 +46,21 @@ def get_series_parrerns_for_geo():
 def get_gse_ids_from_pattern(gse_pattern):
     url = "https://ftp.ncbi.nlm.nih.gov/geo/series/" + gse_pattern + "/"
 
-    response = requests.get(url)
+    soup = None
+    number_of_retry = 3
+    retry_num = 0
+    while retry_num <= number_of_retry:
+        try:
+            response = requests.get(url)
+            soup = BeautifulSoup(response.content, "html.parser")
+            retry_num = number_of_retry + 1
+        except Exception as err:
+            retry_num = retry_num + 1
+            print("Not able to get patten " + gse_pattern + " going to retry")
+            time.sleep(5)
 
-    # Parse the HTML content using BeautifulSoup
-    soup = BeautifulSoup(response.content, "html.parser")
-
-    # Find all the links (directories) on the page
-
+    if soup == None:
+        return []
     # Getting the date from the list
     links = soup.find_all("pre")[0]
     datetime_values = re.findall(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}', str(links))
@@ -162,7 +170,7 @@ def get_series_metadata_from_soft_file(gse_id):
             retry_num = number_of_retry + 1
         except Exception as err:
             retry_num = retry_num + 1
-            print("Not able to parse " + gse_id + "going to retry")
+            print("Not able to parse " + gse_id + " going to retry")
             time.sleep(5)
     
     return parse_soft_file(decompressed_data)
