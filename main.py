@@ -216,7 +216,7 @@ def add_update_metadata(number_of_process, min_memory, shuffle=False):
                                          "list_to_parallel": list_to_add}, number_of_process, min_memory, shuffle)
 
 
-def main(function_call, process_number=None, min_memory=None, shuffle=None):
+def main(function_call, all_func_args):
     wait_time_in_minutes = 5 
     if function_call.startswith("__"):
         raise NotImplementedError("Method %s not callable" % function_call)
@@ -230,34 +230,38 @@ def main(function_call, process_number=None, min_memory=None, shuffle=None):
 
     while True:
         try:
-            if function_call == "validate_sample":
-                method()
-            else:
-                method(process_number, min_memory, shuffle)
+            method(**all_func_args)
         except Exception as err:
             print(traceback.format_exc())
         time.sleep( wait_time_in_minutes * 60 )
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Choose the functions to run')
-    parser.add_argument('--function', required=True,
+    possibles = globals().copy()
+    possibles.update(locals())
+    avail_func = [ k for k in possibles.keys() if inspect.isfunction(possibles.get(k)) and not(k.startswith("__")) and not(k == "main")]
+    
+    main_parser = argparse.ArgumentParser(add_help=False)
+    main_parser.add_argument('--function', required=True, choices=avail_func,
                         help='functions that need to be called')
+    main_args, _ = main_parser.parse_known_args()
 
-    process_number = None
-    min_memory = None
-    shuffle = None
+    parser = argparse.ArgumentParser(parents=[main_parser])
 
-    parser.add_argument('--number_of_process', required=True,
-                        help='Number of process to run')
-    parser.add_argument('--min_memory', required=True,
-                        help='Min amount of memory in MB that need to be there for the process to run. If not there the process will restart')
-    parser.add_argument('--shuffle', action=argparse.BooleanOptionalAction,
-                        help='Should the list that is running in parallel shuffle or not by default its False')
-    parser.set_defaults(shuffle=False)
+    method = possibles.get(main_args.function)
+    signature = inspect.signature(method)
+    for k, v in signature.parameters.items():
+        if v.default is inspect.Parameter.empty:
+            parser.add_argument('--{}'.format(k), required=True)
+        else:
+            if isinstance(v.default, bool):
+                parser.add_argument('--{}'.format(k), action=argparse.BooleanOptionalAction)
+            else:
+                parser.add_argument('--{}'.format(k))
+            pos_arg = {k:v.default}
+            parser.set_defaults(**pos_arg)
     args = parser.parse_args()
-    process_number = int(args.number_of_process)
-    min_memory = int(args.min_memory)
-    shuffle = args.shuffle
+    func_args = args.__dict__.copy()
+    del func_args['function']
+    main(args.function, func_args)
 
-    main(args.function, process_number, min_memory, shuffle)
