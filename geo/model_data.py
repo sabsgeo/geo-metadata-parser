@@ -83,8 +83,8 @@ class ModelData():
                 channel_data = {}
                 each_geo_sample = {
                     "_id": str(sample_id),
-                    "gse_id": str(gse_id),
                     "gsm_id": str(sample_id),
+                    "Sample_series_id": self.soft_data_type_to_list(soft_file["SAMPLE"][sample_id], "Sample_series_id"),
                     "Sample_library_selection": self.soft_data_type_to_string(soft_file["SAMPLE"][sample_id], "Sample_library_selection"),
                     "Sample_supplementary_file": self.soft_data_type_to_list(soft_file["SAMPLE"][sample_id], "Sample_supplementary_file"),
                     "Sample_description": self.soft_data_type_to_string(soft_file["SAMPLE"][sample_id], "Sample_description"),

@@ -53,11 +53,6 @@ def validate_sample(run_interval=30):
         None
 
     """
-    pipeline = [
-        {"$group": {"_id": "$gse_id", "count": {"$sum": 1}}},
-        {"$sort": {"count": -1}}
-    ]
-
     geo_mongo_instance = geo_mongo.GeoMongo()
     print("Getting all series metadata")
     gse_id_list = list(geo_mongo_instance.series_metadata_collection.find(
@@ -80,20 +75,13 @@ def validate_sample(run_interval=30):
             "Platform_organism": False
         }
     ))
-    print("Getting sample level count")
-    count_details = geo_mongo_instance.sample_metadata_collection.aggregate(
-        pipeline)
-
-    sample_count_from_db = {}
-    for result in count_details:
-        sample_count_from_db[result['_id']] = result['count']
 
     print("Going to update db")
     oper = []
     for gse_id in gse_id_list:
-        number_samples_from_geo = len(gse_id.get("Series_sample_id"))
-        number_samples_from_db = sample_count_from_db.get(
-            gse_id.get("gse_id"), 0)
+        sample_ids = gse_id.get("Series_sample_id")
+        number_samples_from_geo = len(sample_ids)
+        number_samples_from_db = geo_mongo_instance.sample_metadata_collection.count_documents({ "_id": { "$in": sample_ids } })
         sample_status = "valid"
 
         if not (number_samples_from_geo == number_samples_from_db):
