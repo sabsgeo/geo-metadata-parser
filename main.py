@@ -1,5 +1,4 @@
 from geo import geo_mongo
-from geo import model_data
 from geo import parallel_runner
 from geo import geo
 from pymongo import UpdateOne
