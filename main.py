@@ -39,12 +39,12 @@ def sync_status_from_geo(number_of_process, min_memory, shuffle=False):
         main_helper.add_geo_sync_info_to_mongo, {"list_to_parallel": series_pattern, "get_gse_status": final_get_gse_status}, number_of_process, min_memory, shuffle)
 
 
-def validate_sample():
+def validate_sample(run_interval=30):
     """
     Validates the sample level metadata in the internal database and updates the sample status accordingly.
 
     Args:
-        None
+        run_interval (int): The interval in minutes for running the validation process. Default is 30 minutes.
 
     Returns:
         None
@@ -111,6 +111,7 @@ def validate_sample():
     geo_mongo_instance.all_geo_series_collection.bulk_write(
         oper, ordered=False)
     print("Update complete")
+    time.sleep(run_interval * 60)
 
 def add_update_metadata(number_of_process, min_memory, shuffle=False):
     """
