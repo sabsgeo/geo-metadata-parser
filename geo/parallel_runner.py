@@ -6,7 +6,7 @@ import random
 def add_data_in_parallel(funtion_to_call, list_to_parallel_other_params, number_of_process, min_mem_in_system, shuffle_list):
     list_to_parallel = list_to_parallel_other_params.get('list_to_parallel')
     if len(list_to_parallel) < number_of_process:
-        number_of_process = int(len(list_to_parallel) / 2)
+        number_of_process = int(len(list_to_parallel) / 3)
     
     if number_of_process < 1:
         number_of_process = 1
