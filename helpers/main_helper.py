@@ -54,8 +54,6 @@ def get_diff_between_geo_and_all_geo_series_sync_info(modified_gse_ids, get_gse_
             all_series_data_to_add.append(data_to_add)
             print("GSE ID is private: " +
                     modified_gse_id)
-    print(all_series_data_to_add)
-    print(all_series_data_to_update)
     return all_series_data_to_add, all_series_data_to_update
 
 
@@ -66,6 +64,8 @@ def add_geo_sync_info_to_mongo(all_params):
     data_to_be_add, data_to_be_update = get_diff_between_geo_and_all_geo_series_sync_info(
         modified_gse_ids, get_gse_status)
     
+    print(data_to_be_add)
+    print(data_to_be_update)
     add_oper = []
     update_oper = []
 
