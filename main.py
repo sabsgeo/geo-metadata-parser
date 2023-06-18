@@ -10,7 +10,7 @@ import time
 import inspect
 
 
-def sync_status_from_geo(for_n_days, number_of_process, min_memory):
+def sync_status_from_geo(for_n_days, number_of_process, min_memory, run_interval=60):
     """
     Synchronizes the data status of GEO to internal database.
 
@@ -18,6 +18,7 @@ def sync_status_from_geo(for_n_days, number_of_process, min_memory):
         for_n_days (int): Number of days back from todays date to be checked to find the modified GSE ID
         number_of_process (int): The number of parallel processes to run.
         min_memory (int): The minimum memory that shouuld be conserved in the system in which function runs.
+        run_interval (int): The interval in minutes for running the validation process. Default is 60 minutes.
 
     Returns:
         None
@@ -35,7 +36,7 @@ def sync_status_from_geo(for_n_days, number_of_process, min_memory):
         final_get_gse_status[gse_id.get("_id")] = gse_id
     shuffle = True
     parallel_runner.add_data_in_parallel(
-        main_helper.add_geo_sync_info_to_mongo, {"list_to_parallel": modified_gse_ids, "get_gse_status": final_get_gse_status}, number_of_process, min_memory, shuffle)
+        main_helper.add_geo_sync_info_to_mongo, {"list_to_parallel": modified_gse_ids, "get_gse_status": final_get_gse_status, "run_interval": run_interval}, number_of_process, min_memory, shuffle)
 
 
 def validate_sample(run_interval=30):
