@@ -19,6 +19,7 @@ def get_diff_between_geo_and_all_geo_series_sync_info(modified_gse_ids, get_gse_
                     last_updated_date = series_data.get("SERIES").get(modified_gse_id).get("Series_last_update_date")
                 except Exception as err:
                     _modified_gse_id = "GSE" + str(int(modified_gse_id[3:]))
+                    print("Trying modified gse_id {} original one was {}".format(_modified_gse_id, modified_gse_id))
                     last_updated_date = series_data.get("SERIES").get(_modified_gse_id).get("Series_last_update_date")
             except Exception as err:
                 print("There is some unknown issue with GSE ID {}".format(modified_gse_id))
