@@ -75,6 +75,7 @@ def add_geo_sync_info_to_mongo(all_params):
     sync_iter = get_diff_between_geo_and_all_geo_series_sync_info(
         modified_gse_ids, get_gse_status)
     for data_to_add, data_to_update in sync_iter:
+        print("I got it")
         add_oper = []
         update_oper = []
         for add_gse in data_to_add:
@@ -92,6 +93,7 @@ def add_geo_sync_info_to_mongo(all_params):
         if len(update_oper) > 0:
             geo_mongo_instance.all_geo_series_collection.bulk_write(
                 update_oper, ordered=False)
+    print("I am out")
 
 def add_series_and_sample_metadata(all_params):
     list_to_add = all_params.get("list_to_parallel")
