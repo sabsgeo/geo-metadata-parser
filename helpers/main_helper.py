@@ -63,7 +63,8 @@ def get_diff_between_geo_and_all_geo_series_sync_info(modified_gse_ids, get_gse_
             start_time = time.time()
             all_series_data_to_add = []
             all_series_data_to_update = []
-
+    print(all_series_data_to_add)
+    print(all_series_data_to_update)
     if len(all_series_data_to_add) > 0 or len(all_series_data_to_update) > 0:
         print("I am here")
         yield all_series_data_to_add, all_series_data_to_update
