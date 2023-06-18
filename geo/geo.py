@@ -35,39 +35,6 @@ def get_recently_modified_gse_ids(n_days):
 
     return gse_ids
 
-def get_series_parrerns_for_geo():
-    # URL to scrape
-    url = "https://ftp.ncbi.nlm.nih.gov/geo/series/"
-
-    # Send a GET request to the URL
-    response = requests.get(url)
-
-    # Parse the HTML content using BeautifulSoup
-    soup = BeautifulSoup(response.content, "html.parser")
-
-    # Find all the links (directories) on the page
-
-    # Getting the date from the list
-    links = soup.find_all("pre")[0]
-    datetime_values = re.findall(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}', str(links))
-
-    # Getting all the href and removing the headinf by poping
-    hrefs = re.findall(r'href="([^"]*)"', str(links))
-    gse_patterns = sorted(set(hrefs), key=hrefs.index)
-    gse_patterns.pop(0)
-    final_result = []
-    if len(datetime_values) == len(gse_patterns):
-        for gse_patten, datetime_value in zip(gse_patterns, datetime_values):
-            gse_patten_index = 0 if len(re.findall(
-                r'\d+', gse_patten)) == 0 else int(re.findall(r'\d+', gse_patten)[0])
-            # Removing the exttra backslash
-            final_result.append(
-                {'gse_patten': gse_patten[:-1], 'last_modified': datetime_value, 'index': gse_patten_index})
-    else:
-        print("Parse not fine")
-
-    return sorted(final_result, key=lambda d: d['index'], reverse=True)
-
 
 def get_gse_ids_from_pattern(gse_pattern):
     url = "https://ftp.ncbi.nlm.nih.gov/geo/series/" + gse_pattern + "/"
