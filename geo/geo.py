@@ -1,4 +1,6 @@
-from geo import model_data
+from Bio import Entrez
+
+from datetime import datetime, timedelta
 import requests
 from bs4 import BeautifulSoup
 import re
@@ -8,6 +10,30 @@ import io
 import json
 import traceback
 import time
+
+
+def get_recently_modified_gse_ids(n_days):
+    Entrez.email = "your_email@example.com"
+    end_date = datetime.today().strftime('%Y/%m/%d')
+    start_date = (datetime.today() - timedelta(days=n_days)).strftime('%Y/%m/%d')
+
+    query = f"GSE[ETYP] AND {start_date}[UDAT] : {end_date}[UDAT]"
+    handle = Entrez.esearch(db="gds", term=query, retmax=0)
+    record = Entrez.read(handle)
+    total_count = int(record["Count"])
+    handle.close()
+
+    handle = Entrez.esearch(db="gds", term=query, retmax=total_count)
+    record = Entrez.read(handle)
+    handle.close()
+
+    geo_ids = record["IdList"]
+    gse_ids = []
+
+    for geo_id in geo_ids:
+        gse_ids.append("GSE{}".format(geo_id[3:]))
+
+    return gse_ids
 
 def get_series_parrerns_for_geo():
     # URL to scrape
@@ -74,6 +100,14 @@ def get_gse_ids_from_pattern(gse_pattern):
     else:
         print("Parse not fine")
     return final_result
+
+
+def gse_pattern_from_gse_id(gse_id):
+    id = int(int(re.findall(r'\d+', gse_id)[0]) / 1000)
+    if id == 0:
+        id = ""
+
+    return "GSE{}nnn".format(str(id))
 
 
 def has_soft_file(gse_id):
