@@ -10,10 +10,9 @@ def parse_medline(pmid):
     number_of_retry = 3
     retry_num = 0
     while retry_num <= number_of_retry:
-        response = requests.get(url)
-
-        statusCode = response.status_code
-        if statusCode == 200:
+        records = {}
+        try:
+            response = requests.get(url)
             records = Medline.parse(response.text.split("\n"))
             for record in records:
                 if "TI" in record:
@@ -21,15 +20,10 @@ def parse_medline(pmid):
                 else:
                     print("Some issue in parsing the PUBMED ID {}".format(pmid))
                     return {}
-        else:
+        except Exception as err:
             retry_num = retry_num + 1
             print("Retrying {} time for {}".format(retry_num, pmid))
     return {}
-
-
-# Example usage
-pmid = "23347031"  # Replace with the PMID of the article you want to parse
-pmid_json = parse_medline(pmid)
 
 
 json_data = open(
@@ -48,20 +42,20 @@ for each_data in json_data.split("\n"):
         for pubmed_id in pubmed_ids:
             pub_json = parse_medline(pubmed_id)
             d = json.dumps({
-                        "PMID": pmid,
-                        "PMC ID": pmid_json.get("PMC", ""),
-                        "Title": pmid_json.get("TI", ""),
-                        "Transliterated Title": pmid_json.get("TT", ""),
-                        "Journal Title": pmid_json.get("JT", ""),
-                        "Journal Title Abbreviation": pmid_json.get("TA", ""),
-                        "Publication Type": pmid_json.get("PT", []),
-                        "Abstract": pmid_json.get("AB", ""),
-                        "Medical Subject Headings": pmid_json.get("MH", []),
-                        "Source": pmid_json.get("SO", ""),
-                        "Artile Identifier": pmid_json.get("AID", []),
-                        "General Note": pmid_json.get("GN", ""),
-                        "Substance Name": pmid_json.get("NM", ""),
-                        "Registry Number": pmid_json.get("RN", [])
+                        "PMID": pubmed_id,
+                        "PMC ID": pub_json.get("PMC", ""),
+                        "Title": pub_json.get("TI", ""),
+                        "Transliterated Title": pub_json.get("TT", ""),
+                        "Journal Title": pub_json.get("JT", ""),
+                        "Journal Title Abbreviation": pub_json.get("TA", ""),
+                        "Publication Type": pub_json.get("PT", []),
+                        "Abstract": pub_json.get("AB", ""),
+                        "Medical Subject Headings": pub_json.get("MH", []),
+                        "Source": pub_json.get("SO", ""),
+                        "Artile Identifier": pub_json.get("AID", []),
+                        "General Note": pub_json.get("GN", ""),
+                        "Substance Name": pub_json.get("NM", ""),
+                        "Registry Number": pub_json.get("RN", [])
                     }
                 )
             if d not in json_coll:
