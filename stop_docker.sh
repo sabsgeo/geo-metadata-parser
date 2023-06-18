@@ -1,1 +1,1 @@
-sudo docker kill $(docker ps -q)
+sudo docker stop $(docker ps -q)
