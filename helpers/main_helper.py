@@ -7,10 +7,8 @@ from pymongo import UpdateOne
 import time
 
 def get_diff_between_geo_and_all_geo_series_sync_info(modified_gse_ids, get_gse_status):
-    time_to_sync_in_minutes = 2
     all_series_data_to_add = []
     all_series_data_to_update = []
-    start_time = time.time()
     for modified_gse_id in modified_gse_ids:
         if geo.has_soft_file(modified_gse_id):
             selected_one = get_gse_status.get(modified_gse_id)
@@ -56,46 +54,35 @@ def get_diff_between_geo_and_all_geo_series_sync_info(modified_gse_ids, get_gse_
             all_series_data_to_add.append(data_to_add)
             print("GSE ID is private: " +
                     modified_gse_id)
-        end_time = time.time()
-        if end_time - start_time > time_to_sync_in_minutes * 60:
-            if len(all_series_data_to_add) > 0 or len(all_series_data_to_update) > 0:
-                yield all_series_data_to_add, all_series_data_to_update    
-            start_time = time.time()
-            all_series_data_to_add = []
-            all_series_data_to_update = []
-    print(all_series_data_to_add)
-    print(all_series_data_to_update)
-    if len(all_series_data_to_add) > 0 or len(all_series_data_to_update) > 0:
-        print("I am here")
-        yield all_series_data_to_add, all_series_data_to_update
+    return all_series_data_to_add, all_series_data_to_update
 
 
 def add_geo_sync_info_to_mongo(all_params):
     geo_mongo_instance = geo_mongo.GeoMongo()
     modified_gse_ids = all_params.get("list_to_parallel")
     get_gse_status = all_params.get("get_gse_status")
-    sync_iter = get_diff_between_geo_and_all_geo_series_sync_info(
+    data_to_be_add, data_to_be_update = get_diff_between_geo_and_all_geo_series_sync_info(
         modified_gse_ids, get_gse_status)
-    for data_to_add, data_to_update in sync_iter:
-        print("I got it")
-        add_oper = []
-        update_oper = []
-        for add_gse in data_to_add:
-            add_oper.append(UpdateOne({"_id": add_gse.get("_id")}, {
-                            "$set": add_gse}, upsert=True))
+    
+    add_oper = []
+    update_oper = []
 
-        for update_gse in data_to_update:
-            update_oper.append(UpdateOne({"_id": update_gse.get("_id")}, {
-                               "$set": update_gse}, upsert=True))
+    for data_to_add in data_to_be_add:
+        add_oper.append(UpdateOne({"_id": data_to_add.get("_id")}, {
+                            "$set": data_to_add}, upsert=True))
 
-        if len(add_oper) > 0:
-            geo_mongo_instance.all_geo_series_collection.bulk_write(
-                add_oper, ordered=False)
+    for data_to_update in data_to_be_update:
+        update_oper.append(UpdateOne({"_id": data_to_update.get("_id")}, {
+                            "$set": data_to_update}, upsert=True))
 
-        if len(update_oper) > 0:
-            geo_mongo_instance.all_geo_series_collection.bulk_write(
-                update_oper, ordered=False)
-    print("I am out")
+
+    if len(add_oper) > 0:
+        geo_mongo_instance.all_geo_series_collection.bulk_write(
+            add_oper, ordered=False)
+
+    if len(update_oper) > 0:
+        geo_mongo_instance.all_geo_series_collection.bulk_write(
+            update_oper, ordered=False)
 
 def add_series_and_sample_metadata(all_params):
     list_to_add = all_params.get("list_to_parallel")
