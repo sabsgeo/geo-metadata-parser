@@ -18,7 +18,6 @@ def sync_status_from_geo(for_n_days, number_of_process, min_memory):
         for_n_days (int): Number of days back from todays date to be checked to find the modified GSE ID
         number_of_process (int): The number of parallel processes to run.
         min_memory (int): The minimum memory that shouuld be conserved in the system in which function runs.
-        shuffle (bool, optional): Flag indicating whether to shuffle the data. Defaults to False.
 
     Returns:
         None
