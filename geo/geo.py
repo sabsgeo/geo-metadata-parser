@@ -78,12 +78,8 @@ def gse_pattern_from_gse_id(gse_id):
 
 
 def has_soft_file(gse_id):
-    id = int(int(re.findall(r'\d+', gse_id)[0]) / 1000)
-    if id == 0:
-        id = ""
-
-    url = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE" + \
-        str(id) + "nnn/" + gse_id + "/"
+    pattern_from_id = gse_pattern_from_gse_id(gse_id)
+    url = "https://ftp.ncbi.nlm.nih.gov/geo/series/{}/{}/".format(pattern_from_id, gse_id)
     links = ""
     try:
         response = requests.get(url)
@@ -186,11 +182,8 @@ def read_full_soft_file(gse_id):
         print(traceback.format_exc())
         print("Error in "+ gse_id + " tring to add again by another method")
         try:
-            id = int(int(re.findall(r'\d+', gse_id)[0]) / 1000)
-            if id == 0:
-                id = ""
-            url = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE" + \
-                str(id) + "nnn/" + gse_id + "/soft/" + gse_id + "_family.soft.gz"
+            pattern_from_id = gse_pattern_from_gse_id(gse_id)
+            url = "https://ftp.ncbi.nlm.nih.gov/geo/series/{}/{}/soft/{}_family.soft.gz".format(pattern_from_id, gse_id, gse_id)
             with urllib.request.urlopen(url) as response:
                 compressed_data = response.read()
         # Decompress the data
