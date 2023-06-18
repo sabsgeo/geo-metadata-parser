@@ -77,7 +77,8 @@ def add_geo_sync_info_to_mongo(all_params):
         update_oper.append(UpdateOne({"_id": data_to_update.get("_id")}, {
                             "$set": data_to_update}, upsert=True))
 
-
+    print(add_oper)
+    print(update_oper)
     if len(add_oper) > 0:
         geo_mongo_instance.all_geo_series_collection.bulk_write(
             add_oper, ordered=False)
