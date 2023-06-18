@@ -36,6 +36,29 @@ def get_recently_modified_gse_ids(n_days):
     return gse_ids
 
 
+def get_recently_added_gse_ids(n_days):
+    Entrez.email = "your_email@example.com"
+    end_date = datetime.today().strftime('%Y/%m/%d')
+    start_date = (datetime.today() - timedelta(days=n_days)).strftime('%Y/%m/%d')
+
+    query = f"GSE[ETYP] AND {start_date}[PDAT] : {end_date}[PDAT]"
+    handle = Entrez.esearch(db="gds", term=query, retmax=0)
+    record = Entrez.read(handle)
+    total_count = int(record["Count"])
+    handle.close()
+
+    handle = Entrez.esearch(db="gds", term=query, retmax=total_count)
+    record = Entrez.read(handle)
+    handle.close()
+
+    geo_ids = record["IdList"]
+    gse_ids = []
+
+    for geo_id in geo_ids:
+        gse_ids.append("GSE{}".format(geo_id[3:]))
+
+    return gse_ids
+
 def get_gse_ids_from_pattern(gse_pattern):
     url = "https://ftp.ncbi.nlm.nih.gov/geo/series/" + gse_pattern + "/"
 
