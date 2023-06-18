@@ -14,9 +14,9 @@ def get_diff_between_geo_and_all_geo_series_sync_info(modified_gse_ids, get_gse_
             selected_one = get_gse_status.get(modified_gse_id)
             series_data = geo.get_series_metadata_from_soft_file(modified_gse_id)
             last_updated_date = "-"
-            try:
+            if "SERIES" in series_data and modified_gse_id in series_data.get("SERIES") and "Series_last_update_date" in series_data.get("SERIES").get(modified_gse_id):
                 last_updated_date = series_data.get("SERIES").get(modified_gse_id).get("Series_last_update_date")
-            except Exception as err:
+            else:
                 print("There is some unknown issue with GSE ID {}".format(modified_gse_id))
                 continue
             if selected_one == None:
