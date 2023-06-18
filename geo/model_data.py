@@ -41,24 +41,29 @@ class ModelData():
         if not (bool(soft_file)):
             return series_metadata, all_sample_data
     
+        modified_gse_id = gse_id
+        if "SERIES" in soft_file:
+            if not(gse_id in soft_file["SERIES"]):
+                modified_gse_id = "GSE" + str(int(gse_id[3:]))
+
 
         if "SERIES" in soft_file:
             series_metadata = {
                 "_id": gse_id,
                 "gse_id": gse_id,
-                "Series_title": self.soft_data_type_to_string(soft_file["SERIES"][gse_id], "Series_title"),
-                "Series_status": self.soft_data_type_to_string(soft_file["SERIES"][gse_id], "Series_status"),
-                "Series_pubmed_id": self.soft_data_type_to_list(soft_file["SERIES"][gse_id], "Series_pubmed_id"),
-                "Series_web_link": self.soft_data_type_to_string(soft_file["SERIES"][gse_id], "Series_web_link"),
-                "Series_summary": self.soft_data_type_to_string(soft_file["SERIES"][gse_id], "Series_summary"),
-                "Series_overall_design": self.soft_data_type_to_string(soft_file["SERIES"][gse_id], "Series_overall_design"),
-                "Series_type": self.soft_data_type_to_list(soft_file["SERIES"][gse_id], "Series_type"),
-                "Series_contributor": self.soft_data_type_to_list(soft_file["SERIES"][gse_id], "Series_contributor"),
-                "Series_sample_id": self.soft_data_type_to_list(soft_file["SERIES"][gse_id], "Series_sample_id"),
-                "Series_contact_institute": self.soft_data_type_to_string(soft_file["SERIES"][gse_id], "Series_contact_institute"),
-                "Series_supplementary_file": self.soft_data_type_to_list(soft_file["SERIES"][gse_id], "Series_supplementary_file"),
-                "Series_platform_id": self.soft_data_type_to_list(soft_file["SERIES"][gse_id], "Series_platform_id"),
-                "Series_relation": self.soft_data_type_to_list(soft_file["SERIES"][gse_id], "Series_relation"),
+                "Series_title": self.soft_data_type_to_string(soft_file["SERIES"][modified_gse_id], "Series_title"),
+                "Series_status": self.soft_data_type_to_string(soft_file["SERIES"][modified_gse_id], "Series_status"),
+                "Series_pubmed_id": self.soft_data_type_to_list(soft_file["SERIES"][modified_gse_id], "Series_pubmed_id"),
+                "Series_web_link": self.soft_data_type_to_string(soft_file["SERIES"][modified_gse_id], "Series_web_link"),
+                "Series_summary": self.soft_data_type_to_string(soft_file["SERIES"][modified_gse_id], "Series_summary"),
+                "Series_overall_design": self.soft_data_type_to_string(soft_file["SERIES"][modified_gse_id], "Series_overall_design"),
+                "Series_type": self.soft_data_type_to_list(soft_file["SERIES"][modified_gse_id], "Series_type"),
+                "Series_contributor": self.soft_data_type_to_list(soft_file["SERIES"][modified_gse_id], "Series_contributor"),
+                "Series_sample_id": self.soft_data_type_to_list(soft_file["SERIES"][modified_gse_id], "Series_sample_id"),
+                "Series_contact_institute": self.soft_data_type_to_string(soft_file["SERIES"][modified_gse_id], "Series_contact_institute"),
+                "Series_supplementary_file": self.soft_data_type_to_list(soft_file["SERIES"][modified_gse_id], "Series_supplementary_file"),
+                "Series_platform_id": self.soft_data_type_to_list(soft_file["SERIES"][modified_gse_id], "Series_platform_id"),
+                "Series_relation": self.soft_data_type_to_list(soft_file["SERIES"][modified_gse_id], "Series_relation"),
             }
 
         if "PLATFORM" in soft_file:
@@ -73,7 +78,7 @@ class ModelData():
                             soft_file["PLATFORM"][platform_id], platform_field)
         else:
             series_metadata["Platform_organism"] = list(set(self.soft_data_type_to_list(
-                soft_file["SERIES"][gse_id], "Series_platform_organism") + self.soft_data_type_to_list(soft_file["SERIES"][gse_id], "Series_sample_organism")))
+                soft_file["SERIES"][modified_gse_id], "Series_platform_organism") + self.soft_data_type_to_list(soft_file["SERIES"][modified_gse_id], "Series_sample_organism")))
             series_metadata["Platform_technology"] = []
             series_metadata["Platform_title"] = []
 
