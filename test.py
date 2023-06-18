@@ -29,6 +29,7 @@ def parse_medline(pmid):
 json_data = open(
     '/Users/sabugeorge-elucidata/Personal/GEO-parsed/series_metadata.json')
 
+json_data = open('/home/ubuntu/series_metadata.json')
 # returns JSON object as
 # a dictionary
 json_data = json_data.read()
