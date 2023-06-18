@@ -32,7 +32,6 @@ def get_diff_between_geo_and_all_geo_series_sync_info(modified_gse_ids, get_gse_
                     "sample_status": "invalid"
                 }
                 all_series_data_to_add.append(data_to_add)
-                print(all_series_data_to_add)
                 print("GSE ID has to be added: " +
                         modified_gse_id)
             elif not (selected_one.get("last_updated") == last_updated_date):
@@ -42,7 +41,6 @@ def get_diff_between_geo_and_all_geo_series_sync_info(modified_gse_ids, get_gse_
                     "last_updated": last_updated_date
                 }
                 all_series_data_to_update.append(update_to_add)
-                print(all_series_data_to_update)
                 print("GSE ID has to be updated: " +
                         modified_gse_id)
         else:
@@ -56,7 +54,6 @@ def get_diff_between_geo_and_all_geo_series_sync_info(modified_gse_ids, get_gse_
                 "sample_status": "valid"
             }
             all_series_data_to_add.append(data_to_add)
-            print(all_series_data_to_add)
             print("GSE ID is private: " +
                     modified_gse_id)
     return all_series_data_to_add, all_series_data_to_update
@@ -69,8 +66,6 @@ def add_geo_sync_info_to_mongo(all_params):
     data_to_be_add, data_to_be_update = get_diff_between_geo_and_all_geo_series_sync_info(
         modified_gse_ids, get_gse_status)
     
-    print(data_to_be_add)
-    print(data_to_be_update)
     add_oper = []
     update_oper = []
 
@@ -82,8 +77,6 @@ def add_geo_sync_info_to_mongo(all_params):
         update_oper.append(UpdateOne({"_id": data_to_update.get("_id")}, {
                             "$set": data_to_update}, upsert=True))
 
-    print(add_oper)
-    print(update_oper)
     if len(add_oper) > 0:
         geo_mongo_instance.all_geo_series_collection.bulk_write(
             add_oper, ordered=False)

@@ -10,7 +10,7 @@ import time
 import inspect
 
 
-def sync_status_from_geo(for_n_days,number_of_process, min_memory, shuffle=False):
+def sync_status_from_geo(for_n_days, number_of_process, min_memory):
     """
     Synchronizes the data status of GEO to internal database.
 
@@ -34,7 +34,7 @@ def sync_status_from_geo(for_n_days,number_of_process, min_memory, shuffle=False
     final_get_gse_status = {}
     for gse_id in get_gse_status:
         final_get_gse_status[gse_id.get("_id")] = gse_id
-
+    shuffle = True
     parallel_runner.add_data_in_parallel(
         main_helper.add_geo_sync_info_to_mongo, {"list_to_parallel": modified_gse_ids, "get_gse_status": final_get_gse_status}, number_of_process, min_memory, shuffle)
 
