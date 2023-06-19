@@ -126,6 +126,25 @@ def add_update_metadata(number_of_process, min_memory, shuffle=False):
     parallel_runner.add_data_in_parallel(main_helper.add_series_and_sample_metadata, {
                                          "list_to_parallel": list_to_add}, number_of_process, min_memory, shuffle)
 
+def get_data_from_pubmed(number_of_process, min_memory):
+    """
+    Gets the data from pubmed
+
+    Args:
+        number_of_process (int): The number of parallel processes to run.
+        min_memory (int): The minimum memory that should be conserved in the system in which function runs.
+
+    Returns:
+        None
+
+    Raises:
+        None
+
+    """
+    json_data = open('/mnt/series_metadataMonday_Jun_19_2023_04:22:06.json')
+    each_json = json_data.split("\n")
+    parallel_runner.add_data_in_parallel(main_helper.get_into_from_pubmed, {
+                                         "list_to_parallel": each_json}, number_of_process, min_memory, False)
 
 def main(function_call, all_func_args):
     wait_time_in_minutes = 5 
