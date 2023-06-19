@@ -5,7 +5,7 @@
 # import csv
 from geo import pubmed
 
-print(pubmed.parse_medline("32381628"))
+print(pubmed.parse_medline("24995990"))
 
 
 # def parse_medline(pmid):
