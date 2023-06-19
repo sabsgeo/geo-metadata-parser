@@ -30,7 +30,7 @@ import os
 # json_data = open(
 #     '/Users/sabugeorge-elucidata/Personal/GEO-parsed/series_metadata.json')
 
-json_data = open('/home/ubuntu/series_metadata.json')
+json_data = open('/home/ubuntu/series_metadataMonday_Jun_19_2023_04:22:06.json')
 # returns JSON object as
 # a dictionary
 json_data = json_data.read()
