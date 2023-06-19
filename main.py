@@ -142,6 +142,7 @@ def get_data_from_pubmed(number_of_process, min_memory):
 
     """
     json_data = open('/mnt/series_metadataMonday_Jun_19_2023_04:22:06.json')
+    json_data = json_data.read()
     each_json = json_data.split("\n")
     parallel_runner.add_data_in_parallel(main_helper.get_into_from_pubmed, {
                                          "list_to_parallel": each_json}, number_of_process, min_memory, False)
