@@ -8,6 +8,7 @@ from pymongo import UpdateOne
 import time
 import json
 import csv
+import random
 
 
 def get_diff_between_geo_and_all_geo_series_sync_info(modified_gse_ids, get_gse_status):
@@ -139,7 +140,7 @@ def get_into_from_pubmed(all_params):
     headers = ['pmid', 'pmc_id', 'title', 'transliterated_title', 'journal_title', 'journal_title_abbreviation',
                'publication_type', 'abstract', 'medical_subject_headings', 'source', 'article_identifier',
                'general_note', 'substance_name', 'registry_number']
-    pro_num = json.loads(list_to_add[0]).get("Series_pubmed_id")
+    pro_num = random.getrandbits(128)
     with open('/mnt/pmbmed_id_info_{}.csv'.format(str(pro_num)), 'w') as write_file:
         writer = csv.DictWriter(write_file, fieldnames=headers)
         for each_data in list_to_add:
@@ -147,6 +148,7 @@ def get_into_from_pubmed(all_params):
             if len(pubmed_ids) > 0:
                 for pubmed_id in pubmed_ids:
                     if not (pubmed_id in pubmed_id_added):
+                        print("Trying to add pubmed id {}".format(pubmed_id))
                         pub_json = pubmed.parse_medline(pubmed_id)
                         writer.writerow({
                             "pmid": pubmed_id,
@@ -165,5 +167,6 @@ def get_into_from_pubmed(all_params):
                             "registry_number": pub_json.get("RN", [])
                         })
                         pubmed_id_added.add(pubmed_id)
+                        print("Added pubmed id {}".format(pubmed_id))
             else:
                 print("Not present")
