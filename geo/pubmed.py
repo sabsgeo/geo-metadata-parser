@@ -11,12 +11,12 @@ def parse_medline(pmid):
         try:
             response = requests.get(url)
             records = Medline.parse(response.text.split("\n"))
-            for record in records:
-                if "TI" in record:
-                    return dict(record)
-                else:
-                    print("Some issue in parsing the PUBMED ID {}".format(pmid))
-                    return {}
+            record = next(records)
+            if "TI" in record:
+                return dict(record)
+            else:
+                print("Some issue in parsing the PUBMED ID {}".format(pmid))
+                return {}
         except Exception as err:
             retry_num = retry_num + 1
             print("Retrying {} time for {}".format(retry_num, pmid))
