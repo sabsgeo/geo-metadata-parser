@@ -9,7 +9,7 @@ class GeoMongo():
 
     def __init__(self):
         #self.uri = "mongodb+srv://read_write_access:EcNPNcoW6T5Dsz6P@geocluster.f6yfva6.mongodb.net"
-        self.uri = "mongodb+srv://user:user@127.0.0.1:27017"
+        self.uri = "mongodb://user:user@127.0.0.1:27017"
         self.client = MongoClient(self.uri, server_api=ServerApi('1'))
         self.geo_db_name = "geodatasets"
         self.geo_db = None
