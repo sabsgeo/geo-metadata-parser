@@ -8,7 +8,8 @@ import traceback
 class GeoMongo():
 
     def __init__(self):
-        self.uri = "mongodb+srv://read_write_access:EcNPNcoW6T5Dsz6P@geocluster.f6yfva6.mongodb.net"
+        #self.uri = "mongodb+srv://read_write_access:EcNPNcoW6T5Dsz6P@geocluster.f6yfva6.mongodb.net"
+        self.uri = "mongodb+srv://user:user@127.0.0.1:27017"
         self.client = MongoClient(self.uri, server_api=ServerApi('1'))
         self.geo_db_name = "geodatasets"
         self.geo_db = None
@@ -20,6 +21,8 @@ class GeoMongo():
         self.series_metadata_collection = None
         self.sample_metadata_collection_name = "sample_metadata"
         self.sample_metadata_collection = None
+        self.pubmed_metadata_collection_name = "pubmed_metadata"
+        self.pubmed_metadata_collection = None
 
         try:
             self.client.admin.command('ping')
@@ -48,6 +51,11 @@ class GeoMongo():
                 raise Exception("Collecttion " + self.sample_metadata_collection_name + " not found")
             
             self.sample_metadata_collection = self.geo_db.get_collection(self.sample_metadata_collection_name)
+
+            if not(self.pubmed_metadata_collection_name in self.geo_db.list_collection_names()):
+                raise Exception("Collecttion " + self.pubmed_metadata_collection_name + " not found")
+            
+            self.pubmed_metadata_collection = self.geo_db.get_collection(self.pubmed_metadata_collection_name)
             
             print("You successfully connected to MongoDB!")
         except Exception as err:
