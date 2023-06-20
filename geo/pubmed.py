@@ -1,5 +1,6 @@
 from Bio import Medline
 import requests
+import time
 
 def parse_medline(pmid):
     url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={pmid}&rettype=medline&retmode=text"
@@ -17,4 +18,6 @@ def parse_medline(pmid):
         except Exception as err:
             retry_num = retry_num + 1
             print("Retrying {} time for {}".format(retry_num, pmid))
+            time.sleep(60)
+
     return {}
