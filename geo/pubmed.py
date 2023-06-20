@@ -15,6 +15,7 @@ def parse_medline(pmid):
             for record in records:
                 if "TI" in record:
                     return dict(record)
+            retry_num = number_of_retry + 1
         except Exception as err:
             retry_num = retry_num + 1
             print("Retrying {} time for {}".format(retry_num, pmid))

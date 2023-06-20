@@ -26,9 +26,10 @@ for pubmed_id in pubmed_ids.split(","):
         "substance_name": pub_json.get("NM", ""),
         "registry_number": pub_json.get("RN", [])
     }
+    json_object = json.dumps(final_json, indent=4)
+    with open("pubmed_info1.json", "w") as outfile:
+        outfile.write(json_object)
 
 json_object = json.dumps(final_json, indent=4)
- 
-# Writing to sample.json
 with open("pubmed_info1.json", "w") as outfile:
     outfile.write(json_object)
