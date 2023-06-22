@@ -1,17 +1,5 @@
-from geo import geo_mongo
+from geo import pmc
+from helpers import general_helper
 
-import json
-
-from pymongo import InsertOne
-
-inst = geo_mongo.GeoMongo()
-
-with open("pubmed_info_final.json") as f:
-    json_data = json.load(f)
-    opera = []
-    for k in json_data:
-        data_write = json_data[k].copy()
-        data_write["_id"] = data_write.get("pmid")
-        opera.append(InsertOne(data_write))
-        print(data_write)
-    inst.pubmed_metadata_collection.bulk_write(opera, ordered=False)
+general_helper.save_pmc_tar_path()
+print(pmc.parse_pmc_info("PMC10053706"))

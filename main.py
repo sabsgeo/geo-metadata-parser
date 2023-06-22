@@ -1,6 +1,4 @@
-from geo import geo_mongo
-from geo import parallel_runner
-from geo import geo
+from geo import geo, pmc, parallel_runner, geo_mongo
 from pymongo import UpdateOne
 from helpers import main_helper, general_helper
 
@@ -146,6 +144,25 @@ def get_data_from_pubmed(number_of_process, min_memory):
     each_json = json_data.split("\n")
     parallel_runner.add_data_in_parallel(main_helper.get_into_from_pubmed, {
                                          "list_to_parallel": each_json}, number_of_process, min_memory, False)
+
+def add_data_from_pmc(number_of_process, min_memory):
+    """
+    Add the pmc data into mongodb
+
+    Args:
+        number_of_process (int): The number of parallel processes to run.
+        min_memory (int): The minimum memory that should be conserved in the system in which function runs.
+
+    Returns:
+        None
+
+    Raises:
+        None
+
+    """
+    general_helper.save_pmc_tar_path()
+    pmc.parse_pmc_info("PMC9910620")
+
 
 def main(function_call, all_func_args):
     wait_time_in_minutes = 5 
