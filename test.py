@@ -18,5 +18,5 @@ for data in p:
     d = c.copy()
     d["_id"] = d.get("pmid")
     opers.append(InsertOne(d))
-    f.pubmed_metadata_collection.bulk_write(opers, ordered=False)
-    exit(0)
+
+f.pubmed_metadata_collection.bulk_write(opers, ordered=False)
