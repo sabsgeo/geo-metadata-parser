@@ -1,0 +1,3 @@
+mongoimport --uri "mongodb://user:user@127.0.0.1:27017/geodatasets" --collection all_geo_series --authenticationDatabase admin --type=json --file all_geo_seriesTuesday_Jun_20_2023_14\:44\:05.json
+mongoimport --uri "mongodb://user:user@127.0.0.1:27017/geodatasets" --collection series_metadata --authenticationDatabase admin --type=json --file series_metadataTuesday_Jun_20_2023_14\:44\:05.json
+mongoimport --uri "mongodb://user:user@127.0.0.1:27017/geodatasets" --collection sample_metadata --authenticationDatabase admin --type=json --file sample_metadataTuesday_Jun_20_2023_14\:44\:05.json

@@ -15,8 +15,6 @@ class GeoMongo():
         self.geo_db = None
         self.all_geo_series_collection_name = "all_geo_series"
         self.all_geo_series_collection = None
-        self.state_management_system_collection_name = "state_management_system"
-        self.state_management_system_collection = None
         self.series_metadata_collection_name = "series_metadata"
         self.series_metadata_collection = None
         self.sample_metadata_collection_name = "sample_metadata"
@@ -36,10 +34,6 @@ class GeoMongo():
             
             self.all_geo_series_collection = self.geo_db.get_collection(self.all_geo_series_collection_name)
 
-            if not(self.state_management_system_collection_name in self.geo_db.list_collection_names()):
-                raise Exception("Collecttion " + self.state_management_system_collection_name + " not found")
-            
-            self.state_management_system_collection = self.geo_db.get_collection(self.state_management_system_collection_name)
 
             if not(self.series_metadata_collection_name in self.geo_db.list_collection_names()):
                 raise Exception("Collecttion " + self.series_metadata_collection_name + " not found")
