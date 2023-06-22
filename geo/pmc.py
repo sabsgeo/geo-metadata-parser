@@ -10,9 +10,11 @@ def get_supplementary_info(path):
     tree = general_helper.read_xml(path, nxml=True)
     tree_title = tree.findall(".//supplementary-material/media")
     for element in tree_title:
+        link = [element.attrib[element.attrib.keys()[0]]]
+        text = [k for k in element.itertext()]
         supplementary_data.append({
-            "href": [element.attrib[element.attrib.keys()[0]]], 
-            "text": [k for k in element.itertext()][0]
+            "href": link, 
+            "text": text[0] if len(text) > 0 else "" 
         })
 
     return supplementary_data
