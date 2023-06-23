@@ -185,6 +185,7 @@ def add_data_from_pmc(number_of_process, min_memory):
     count = 0
     for each_study in studies_with_pmc:
         pmc_id = each_study.get("pmc_id")
+        print(pmc_id)
         db_data, upload_data = data_inst.extract_pmc_metadata(pmc_id)
         if len(db_data) < 1 and len(upload_data) < 1:
             continue
@@ -195,7 +196,7 @@ def add_data_from_pmc(number_of_process, min_memory):
         geo_mongo_instance.pmc_metadata_collection.insert_one(db_data)
         count = count + 1
         if count > 10:
-            exit(0)        
+            exit(0)
 
 
 def main(function_call, all_func_args):
