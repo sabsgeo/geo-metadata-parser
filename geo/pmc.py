@@ -25,7 +25,7 @@ def parse_pmc_info(pmc_id):
     pmc_file_name = "oa_file_list_{}.db".format(latest_tar_time)
     pmc_list_path = os.path.join(os.getcwd(), pmc_file_name)
 
-    pmc_parsed_data = {
+    pmc_xml_data = {
         "article_metadata": {},
         "supplementary_metadata": [],
         "tables": [],
@@ -33,6 +33,7 @@ def parse_pmc_info(pmc_id):
         "references": [],
         "paragraph": []
     }
+
 
     if not (os.path.exists(pmc_list_path)):
         raise Exception("db {} not found".format(pmc_list_path))
@@ -52,21 +53,26 @@ def parse_pmc_info(pmc_id):
                 if member.path.endswith(".nxml"):
                     current_file_contents = my_tar.extractfile(member)
                     content = current_file_contents.read()
-                    pmc_parsed_data["article_metadata"] = pubmed_oa_helper.parse_pubmed_xml(content, nxml=True)
-                    pmc_parsed_data["supplementary_metadata"] = get_supplementary_info(content)
-                    pmc_parsed_data["tables"] = pubmed_oa_helper.parse_pubmed_table(content, return_xml=False)
-                    pmc_parsed_data["caption"] = pubmed_oa_helper.parse_pubmed_caption(content)
-                    pmc_parsed_data["references"] = pubmed_oa_helper.parse_pubmed_references(content)
-                    pmc_parsed_data["paragraph"] = pubmed_oa_helper.parse_pubmed_paragraph(content)
+                    pmc_xml_data["article_metadata"] = pubmed_oa_helper.parse_pubmed_xml(content, nxml=True)
+                    pmc_xml_data["supplementary_metadata"] = get_supplementary_info(content)
+                    pmc_xml_data["tables"] = pubmed_oa_helper.parse_pubmed_table(content, return_xml=False)
+                    pmc_xml_data["caption"] = pubmed_oa_helper.parse_pubmed_caption(content)
+                    pmc_xml_data["references"] = pubmed_oa_helper.parse_pubmed_references(content)
+                    pmc_xml_data["paragraph"] = pubmed_oa_helper.parse_pubmed_paragraph(content)
+                elif member.path.endswith(".jpg"):
+                    current_file_contents = my_tar.extractfile(member)
+                    content = current_file_contents.read()
+
+
         
-        for parsed_keys in pmc_parsed_data:
+        for parsed_keys in pmc_xml_data:
             if parsed_keys == "article_metadata":
-                if len(pmc_parsed_data[parsed_keys].keys()) < 1:
-                    pmc_parsed_data[parsed_keys] = {}
+                if len(pmc_xml_data[parsed_keys].keys()) < 1:
+                    pmc_xml_data[parsed_keys] = {}
             else:
-                if pmc_parsed_data[parsed_keys] == None:
-                    pmc_parsed_data[parsed_keys] = []
-    return pmc_parsed_data
+                if pmc_xml_data[parsed_keys] == None:
+                    pmc_xml_data[parsed_keys] = []
+    return pmc_xml_data
 
 def get_latest_pmc_updated_tar_time():
     url = "https://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_file_list.txt"
