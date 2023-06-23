@@ -45,10 +45,12 @@ def parse_pmc_info(pmc_id):
     con = sqlite3.connect(pmc_list_path)
     cur = con.cursor()
     cur.execute("SELECT * FROM oa_file_list WHERE pmc_id=?", (pmc_id,))
-    print(pmc_id)
-    print(cur.fetchall())
-    print(cur.fetchall()[0])
-    tar_path = cur.fetchall()[0][0]
+    selected_row = cur.fetchone()
+    if not(selected_row == None):
+        tar_path = cur.fetchone()[0]
+    else:
+        print("Not able to get the path for {}".format(pmc_id))
+        return {}
     cur.close()
 
     tar_file = "https://ftp.ncbi.nlm.nih.gov/pub/pmc/{}".format(tar_path)
