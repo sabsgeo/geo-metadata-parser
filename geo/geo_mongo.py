@@ -1,6 +1,6 @@
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
-import pandas as pd
+import gridfs
 
 import traceback
 
@@ -10,6 +10,7 @@ class GeoMongo():
     def __init__(self):
         #self.uri = "mongodb+srv://read_write_access:EcNPNcoW6T5Dsz6P@geocluster.f6yfva6.mongodb.net"
         self.uri = "mongodb://user:user@127.0.0.1:27017"
+        self.uri = "mongodb://ec2-13-127-217-184.ap-south-1.compute.amazonaws.com:27017"
         self.client = MongoClient(self.uri, server_api=ServerApi('1'))
         self.geo_db_name = "geodatasets"
         self.geo_db = None
@@ -21,6 +22,10 @@ class GeoMongo():
         self.sample_metadata_collection = None
         self.pubmed_metadata_collection_name = "pubmed_metadata"
         self.pubmed_metadata_collection = None
+        self.pmc_metadata_collection_name = "pmc_metadata"
+        self.pmc_metadata_collection = None
+        
+        self.fs = None
 
         try:
             self.client.admin.command('ping')
@@ -50,6 +55,13 @@ class GeoMongo():
                 raise Exception("Collecttion " + self.pubmed_metadata_collection_name + " not found")
             
             self.pubmed_metadata_collection = self.geo_db.get_collection(self.pubmed_metadata_collection_name)
+
+            if not(self.pmc_metadata_collection_name in self.geo_db.list_collection_names()):
+                raise Exception("Collecttion " + self.pmc_metadata_collection_name + " not found")
+            
+            self.pmc_metadata_collection = self.geo_db.get_collection(self.pmc_metadata_collection_name)
+
+            self.fs = gridfs.GridFS(self.geo_db)
             
             print("You successfully connected to MongoDB!")
         except Exception as err:

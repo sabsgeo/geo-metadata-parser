@@ -1,4 +1,4 @@
-from geo import geo, pmc, parallel_runner, geo_mongo
+from geo import geo, parallel_runner, geo_mongo, model_data
 from pymongo import UpdateOne
 from helpers import main_helper, general_helper
 
@@ -6,6 +6,7 @@ import argparse
 import traceback
 import time
 import inspect
+import hashlib
 
 
 def sync_status_from_geo(for_n_days, number_of_process, min_memory, run_interval=60):
@@ -79,7 +80,8 @@ def validate_sample(run_interval=30):
     for gse_id in gse_id_list:
         sample_ids = gse_id.get("Series_sample_id")
         number_samples_from_geo = len(sample_ids)
-        number_samples_from_db = geo_mongo_instance.sample_metadata_collection.count_documents({ "_id": { "$in": sample_ids } })
+        number_samples_from_db = geo_mongo_instance.sample_metadata_collection.count_documents({
+                                                                                               "_id": {"$in": sample_ids}})
         sample_status = "valid"
 
         if not (number_samples_from_geo == number_samples_from_db):
@@ -98,6 +100,7 @@ def validate_sample(run_interval=30):
         oper, ordered=False)
     print("Update complete")
     time.sleep(run_interval * 60)
+
 
 def add_update_metadata(number_of_process, min_memory, shuffle=False):
     """
@@ -124,6 +127,7 @@ def add_update_metadata(number_of_process, min_memory, shuffle=False):
     parallel_runner.add_data_in_parallel(main_helper.add_series_and_sample_metadata, {
                                          "list_to_parallel": list_to_add}, number_of_process, min_memory, shuffle)
 
+
 def get_data_from_pubmed(number_of_process, min_memory):
     """
     Gets the data from pubmed
@@ -145,6 +149,7 @@ def get_data_from_pubmed(number_of_process, min_memory):
     parallel_runner.add_data_in_parallel(main_helper.get_into_from_pubmed, {
                                          "list_to_parallel": each_json}, number_of_process, min_memory, False)
 
+
 def add_data_from_pmc(number_of_process, min_memory):
     """
     Add the pmc data into mongodb
@@ -160,12 +165,39 @@ def add_data_from_pmc(number_of_process, min_memory):
         None
 
     """
+    geo_mongo_instance = geo_mongo.GeoMongo()
+    studies_with_pmc = geo_mongo_instance.pubmed_metadata_collection.find({"pmc_id": {"$ne": ""}}, projection={
+        "title": False,
+        "journal_title": False,
+        "transliterated_title": False,
+        "journal_title_abbreviation": False,
+        "publication_type": False,
+        "abstract": False,
+        "medical_subject_headings": False,
+        "source": False,
+        "article_identifier": False,
+        "general_note": False,
+        "substance_name": False,
+        "registry_number": False,
+    })
     general_helper.save_pmc_tar_path()
-    pmc.parse_pmc_info("PMC9910620")
+    data_inst = model_data.ModelData()
+    count = 0
+    for each_study in studies_with_pmc:
+        pmc_id = each_study.get("pmc_id")
+        db_data, upload_data = data_inst.extract_pmc_metadata(pmc_id)
+        for upload_types in upload_data:
+            for data_to_upload in upload_data.get(upload_types):
+                _id = hashlib.sha256(data_to_upload.encode()).hexdigest()
+                geo_mongo_instance.fs.put(upload_data.get(upload_types).get(data_to_upload), _id = _id)
+        geo_mongo_instance.pmc_metadata_collection.insert_one(db_data)
+        count = count + 1
+        if count > 10:
+            exit(0)        
 
 
 def main(function_call, all_func_args):
-    wait_time_in_minutes = 5 
+    wait_time_in_minutes = 5
     if function_call.startswith("__"):
         raise NotImplementedError("Method %s not callable" % function_call)
 
@@ -181,17 +213,18 @@ def main(function_call, all_func_args):
             method(**all_func_args)
         except Exception as err:
             print(traceback.format_exc())
-        time.sleep( wait_time_in_minutes * 60 )
+        time.sleep(wait_time_in_minutes * 60)
 
 
 if __name__ == "__main__":
     possibles = globals().copy()
     possibles.update(locals())
-    avail_func = [ k for k in possibles.keys() if inspect.isfunction(possibles.get(k)) and not(k.startswith("__")) and not(k == "main")]
-    
+    avail_func = [k for k in possibles.keys() if inspect.isfunction(
+        possibles.get(k)) and not (k.startswith("__")) and not (k == "main")]
+
     main_parser = argparse.ArgumentParser(add_help=False)
     main_parser.add_argument('--function', required=True, choices=avail_func,
-                        help='functions that need to be called')
+                             help='functions that need to be called')
     main_args, _ = main_parser.parse_known_args()
 
     parser = argparse.ArgumentParser(parents=[main_parser])
@@ -201,20 +234,23 @@ if __name__ == "__main__":
     parse_doc = general_helper.parse_arguments_from_docstring(method)
     for k, v in signature.parameters.items():
         if v.default is inspect.Parameter.empty:
-            parser.add_argument('--{}'.format(k), required=True, help=parse_doc.get(k).get("description"))
+            parser.add_argument('--{}'.format(k), required=True,
+                                help=parse_doc.get(k).get("description"))
         else:
             if isinstance(v.default, bool):
-                parser.add_argument('--{}'.format(k), action=argparse.BooleanOptionalAction, help=parse_doc.get(k).get("description"))
+                parser.add_argument(
+                    '--{}'.format(k), action=argparse.BooleanOptionalAction, help=parse_doc.get(k).get("description"))
             else:
-                parser.add_argument('--{}'.format(k), help=parse_doc.get(k).get("description"))
-            pos_arg = {k:v.default}
+                parser.add_argument(
+                    '--{}'.format(k), help=parse_doc.get(k).get("description"))
+            pos_arg = {k: v.default}
             parser.set_defaults(**pos_arg)
     args = parser.parse_args()
     func_args = args.__dict__.copy()
     del func_args['function']
     for val in parse_doc:
-        converted_val = eval("{}({})".format(parse_doc.get(val).get('type'), func_args.get(val)))
+        converted_val = eval("{}({})".format(
+            parse_doc.get(val).get('type'), func_args.get(val)))
         func_args[val] = converted_val
-    
-    main(args.function, func_args)
 
+    main(args.function, func_args)

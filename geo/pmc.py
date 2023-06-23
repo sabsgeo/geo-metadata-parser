@@ -10,7 +10,7 @@ def get_supplementary_info(path):
     tree = general_helper.read_xml(path, nxml=True)
     tree_title = tree.findall(".//supplementary-material/media")
     for element in tree_title:
-        link = [element.attrib[element.attrib.keys()[0]]]
+        link = element.attrib[element.attrib.keys()[0]]
         text = [k for k in element.itertext()]
         supplementary_data.append({
             "href": link, 
@@ -34,6 +34,7 @@ def parse_pmc_info(pmc_id):
         "paragraph": []
     }
     pmc_image_data = {}
+    pmc_video_data = {}
     pmc_pdf_data = {}
     pmc_zip_data = {}
 
@@ -48,7 +49,6 @@ def parse_pmc_info(pmc_id):
     cur.close()
 
     tar_file = "https://ftp.ncbi.nlm.nih.gov/pub/pmc/{}".format(tar_path)
-    print(tar_file)
     ftpstream = urllib.request.urlopen(tar_file)
     with tarfile.open(fileobj=ftpstream, mode="r|gz") as my_tar:
         for member in my_tar:
@@ -73,7 +73,11 @@ def parse_pmc_info(pmc_id):
                 elif member.path.endswith(".zip"):
                     current_file_contents = my_tar.extractfile(member)
                     content = current_file_contents.read()
-                    pmc_zip_data[member.name] = content                
+                    pmc_zip_data[member.name] = content   
+                elif member.path.endswith(".avi"):
+                    current_file_contents = my_tar.extractfile(member)
+                    content = current_file_contents.read()
+                    pmc_video_data[member.name] = content                
         
         for parsed_keys in pmc_xml_data:
             if parsed_keys == "article_metadata":
@@ -82,7 +86,7 @@ def parse_pmc_info(pmc_id):
             else:
                 if pmc_xml_data[parsed_keys] == None:
                     pmc_xml_data[parsed_keys] = []
-    return { "xml":pmc_xml_data, "image": pmc_image_data, "pdf": pmc_pdf_data, "compressed": pmc_zip_data }
+    return { "xml":pmc_xml_data, "image": pmc_image_data, "pdf": pmc_pdf_data, "compressed": pmc_zip_data, "video": pmc_video_data }
 
 def get_latest_pmc_updated_tar_time():
     url = "https://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_file_list.txt"

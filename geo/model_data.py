@@ -1,4 +1,4 @@
-from geo import geo
+from geo import geo, pmc
 
 import traceback
 
@@ -132,3 +132,27 @@ class ModelData():
             print("Sample not found for GSE ID " + gse_id)
 
         return series_metadata, all_sample_data
+    
+    def extract_pmc_metadata(self, pmc_id):
+        study_all_data = pmc.parse_pmc_info(pmc_id)
+        xml = study_all_data.get("xml")
+        article_metadata = xml.get("article_metadata")
+        article_metadata.pop('coi_statement', None)
+        article_metadata.pop('affiliation_list', None)
+        auth_set = set()
+        for auth_name in article_metadata.get("author_list"):
+            auth_name.pop()
+            auth_set.add(",".join(auth_name))
+        article_metadata["author_list"] = list(auth_set)
+        main_data = {
+            "supplementary_metadata": xml.get("supplementary_metadata"),
+            "caption": xml.get("caption"),
+            "paragraph": xml.get("paragraph"),
+            "references": xml.get("references"),
+            "tables": xml.get("tables")
+        }
+        main_data = {"_id": pmc_id, **article_metadata, **main_data}
+        study_all_data.pop("xml", None)
+        return main_data, study_all_data
+
+
