@@ -47,7 +47,6 @@ def parse_pmc_info(pmc_id):
     cur.execute("SELECT * FROM oa_file_list WHERE pmc_id=?", (pmc_id,))
     selected_row = cur.fetchone()
     if not(selected_row == None):
-        print(selected_row)
         tar_path = selected_row[0]
     else:
         print("Not able to get the path for {}".format(pmc_id))

@@ -135,6 +135,8 @@ class ModelData():
     
     def extract_pmc_metadata(self, pmc_id):
         study_all_data = pmc.parse_pmc_info(pmc_id)
+        if len(study_all_data) < 1:
+            return {}, {}
         xml = study_all_data.get("xml")
         article_metadata = xml.get("article_metadata")
         article_metadata.pop('coi_statement', None)

@@ -186,6 +186,8 @@ def add_data_from_pmc(number_of_process, min_memory):
     for each_study in studies_with_pmc:
         pmc_id = each_study.get("pmc_id")
         db_data, upload_data = data_inst.extract_pmc_metadata(pmc_id)
+        if len(db_data) < 1 and len(upload_data) < 1:
+            continue
         for upload_types in upload_data:
             for data_to_upload in upload_data.get(upload_types):
                 _id = hashlib.sha256(data_to_upload.encode()).hexdigest()
