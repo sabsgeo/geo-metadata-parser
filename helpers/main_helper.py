@@ -149,7 +149,7 @@ def add_series_and_sample_metadata(all_params):
 
 def diff_bw_pmc_and_pubmed():
     geo_mongo_instance = geo_mongo.GeoMongo()
-    studies_with_pmc = geo_mongo_instance.pubmed_metadata_collection.distinct("_id", {})
+    studies_with_pmc = geo_mongo_instance.pubmed_metadata_collection.distinct("pmc_id", {})
     data_collected = geo_mongo_instance.pmc_metadata_collection.distinct("_id", {})
     return list(set(studies_with_pmc) - set(data_collected))
 

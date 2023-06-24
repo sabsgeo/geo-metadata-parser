@@ -1,4 +1,4 @@
-from geo import geo, parallel_runner, geo_mongo, model_data
+from geo import geo, parallel_runner, geo_mongo
 from pymongo import UpdateOne
 from helpers import main_helper, general_helper
 
