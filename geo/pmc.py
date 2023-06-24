@@ -67,11 +67,11 @@ def parse_pmc_info(pmc_id):
                     pmc_xml_data["caption"] = pubmed_oa_helper.parse_pubmed_caption(content)
                     pmc_xml_data["references"] = pubmed_oa_helper.parse_pubmed_references(content)
                     pmc_xml_data["paragraph"] = pubmed_oa_helper.parse_pubmed_paragraph(content)
-                elif member.path.endswith([".jpg", ".gif"]):
+                elif member.path.endswith(tuple([".jpg", ".gif"])):
                     current_file_contents = my_tar.extractfile(member)
                     content = current_file_contents.read()
                     pmc_image_data[member.name] = content
-                elif member.path.endswith([".pdf", ".docx", ".doc", ".xlsx", ".xls"]):
+                elif member.path.endswith(tuple([".pdf", ".docx", ".doc", ".xlsx", ".xls"])):
                     current_file_contents = my_tar.extractfile(member)
                     content = current_file_contents.read()
                     pmc_doc_data[member.name] = content
