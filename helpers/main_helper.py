@@ -106,7 +106,7 @@ def add_metadata_from_pmc(all_params):
     data_inst = model_data.ModelData()
     list_to_add = all_params.get("list_to_parallel")
     for each_study in list_to_add:
-        pmc_id = each_study.get("pmc_id")
+        pmc_id = each_study
         db_data, upload_data = data_inst.extract_pmc_metadata(pmc_id)
         if len(db_data) < 1 and len(upload_data) < 1:
             continue
@@ -147,6 +147,11 @@ def add_series_and_sample_metadata(all_params):
         else:
             print("GSE ID {} is probably private".format(gse_id.get("gse_id")))
 
+def diff_bw_pmc_and_pubmed():
+    geo_mongo_instance = geo_mongo.GeoMongo()
+    studies_with_pmc = geo_mongo_instance.pubmed_metadata_collection.distinct("_id", {})
+    data_collected = geo_mongo_instance.pmc_metadata_collection.distinct("_id", {})
+    return list(set(studies_with_pmc) - set(data_collected))
 
 def get_into_from_pubmed(all_params):
     pubmed_id_added = set()

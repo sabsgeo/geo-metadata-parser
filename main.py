@@ -164,24 +164,25 @@ def add_data_from_pmc(number_of_process, min_memory):
         None
 
     """
-    geo_mongo_instance = geo_mongo.GeoMongo()
-    studies_with_pmc = geo_mongo_instance.pubmed_metadata_collection.find({"pmc_id": {"$ne": ""}}, projection={
-        "title": False,
-        "journal_title": False,
-        "transliterated_title": False,
-        "journal_title_abbreviation": False,
-        "publication_type": False,
-        "abstract": False,
-        "medical_subject_headings": False,
-        "source": False,
-        "article_identifier": False,
-        "general_note": False,
-        "substance_name": False,
-        "registry_number": False,
-    })
+    # geo_mongo_instance = geo_mongo.GeoMongo()
+    # studies_with_pmc = geo_mongo_instance.pubmed_metadata_collection.find({"pmc_id": {"$ne": ""}}, projection={
+    #     "title": False,
+    #     "journal_title": False,
+    #     "transliterated_title": False,
+    #     "journal_title_abbreviation": False,
+    #     "publication_type": False,
+    #     "abstract": False,
+    #     "medical_subject_headings": False,
+    #     "source": False,
+    #     "article_identifier": False,
+    #     "general_note": False,
+    #     "substance_name": False,
+    #     "registry_number": False,
+    # })
+    to_be_added = main_helper.diff_bw_pmc_and_pubmed()
     general_helper.save_pmc_tar_path()
     parallel_runner.add_data_in_parallel(main_helper.add_metadata_from_pmc, {
-                                         "list_to_parallel": studies_with_pmc},number_of_process, min_memory, False)
+                                         "list_to_parallel": to_be_added}, number_of_process, min_memory, False)
 
 
 def main(function_call, all_func_args):
