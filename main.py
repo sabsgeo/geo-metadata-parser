@@ -6,7 +6,6 @@ import argparse
 import traceback
 import time
 import inspect
-import hashlib
 
 
 def sync_status_from_geo(for_n_days, number_of_process, min_memory, run_interval=60):
@@ -181,22 +180,8 @@ def add_data_from_pmc(number_of_process, min_memory):
         "registry_number": False,
     })
     general_helper.save_pmc_tar_path()
-    data_inst = model_data.ModelData()
-    count = 0
-    for each_study in studies_with_pmc:
-        pmc_id = each_study.get("pmc_id")
-        print(pmc_id)
-        db_data, upload_data = data_inst.extract_pmc_metadata(pmc_id)
-        if len(db_data) < 1 and len(upload_data) < 1:
-            continue
-        for upload_types in upload_data:
-            for data_to_upload in upload_data.get(upload_types):
-                _id = hashlib.sha256(data_to_upload.encode()).hexdigest()
-                geo_mongo_instance.fs.put(upload_data.get(upload_types).get(data_to_upload), _id = _id)
-        geo_mongo_instance.pmc_metadata_collection.insert_one(db_data)
-        count = count + 1
-        if count > 10:
-            exit(0)
+    parallel_runner.add_data_in_parallel(main_helper.add_metadata_from_pmc, {
+                                         "list_to_parallel": studies_with_pmc},number_of_process, min_memory, False)
 
 
 def main(function_call, all_func_args):

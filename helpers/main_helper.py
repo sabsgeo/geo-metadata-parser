@@ -9,7 +9,7 @@ import time
 import json
 import csv
 import random
-
+import hashlib
 
 def get_diff_between_geo_and_all_geo_series_sync_info(modified_gse_ids, get_gse_status):
     all_series_data_to_add = []
@@ -101,6 +101,20 @@ def add_geo_sync_info_to_mongo(all_params):
             update_oper, ordered=False)
     time.sleep(time_to_wait_in_min * 60)
 
+def add_metadata_from_pmc(all_params):
+    geo_mongo_instance = geo_mongo.GeoMongo()
+    data_inst = model_data.ModelData()
+    list_to_add = all_params.get("list_to_parallel")
+    for each_study in list_to_add:
+        pmc_id = each_study.get("pmc_id")
+        db_data, upload_data = data_inst.extract_pmc_metadata(pmc_id)
+        if len(db_data) < 1 and len(upload_data) < 1:
+            continue
+        for upload_types in upload_data:
+            for data_to_upload in upload_data.get(upload_types):
+                _id = hashlib.sha256(data_to_upload.encode()).hexdigest()
+                geo_mongo_instance.fs.put(upload_data.get(upload_types).get(data_to_upload), _id = _id)
+        geo_mongo_instance.pmc_metadata_collection.insert_one(db_data)
 
 def add_series_and_sample_metadata(all_params):
     list_to_add = all_params.get("list_to_parallel")
