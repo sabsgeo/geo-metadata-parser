@@ -42,7 +42,7 @@ def parse_pmc_info(pmc_id):
     if not (os.path.exists(pmc_list_path)):
         raise Exception("db {} not found".format(pmc_list_path))
 
-    con = sqlite3.connect(pmc_list_path)
+    con = sqlite3.connect(pmc_list_path, check_same_thread=False)
     cur = con.cursor()
     cur.execute("SELECT * FROM oa_file_list WHERE pmc_id=?", (pmc_id,))
     selected_row = cur.fetchone()
