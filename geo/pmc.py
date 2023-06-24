@@ -35,7 +35,7 @@ def parse_pmc_info(pmc_id):
     }
     pmc_image_data = {}
     pmc_video_data = {}
-    pmc_pdf_data = {}
+    pmc_doc_data = {}
     pmc_zip_data = {}
 
 
@@ -67,14 +67,14 @@ def parse_pmc_info(pmc_id):
                     pmc_xml_data["caption"] = pubmed_oa_helper.parse_pubmed_caption(content)
                     pmc_xml_data["references"] = pubmed_oa_helper.parse_pubmed_references(content)
                     pmc_xml_data["paragraph"] = pubmed_oa_helper.parse_pubmed_paragraph(content)
-                elif member.path.endswith(".jpg") or  member.path.endswith(".gif"):
+                elif member.path.endswith([".jpg", ".gif"]):
                     current_file_contents = my_tar.extractfile(member)
                     content = current_file_contents.read()
                     pmc_image_data[member.name] = content
-                elif member.path.endswith(".pdf"):
+                elif member.path.endswith([".pdf", ".docx", ".doc", ".xlsx", ".xls"]):
                     current_file_contents = my_tar.extractfile(member)
                     content = current_file_contents.read()
-                    pmc_pdf_data[member.name] = content
+                    pmc_doc_data[member.name] = content
                 elif member.path.endswith(".zip"):
                     current_file_contents = my_tar.extractfile(member)
                     content = current_file_contents.read()
@@ -82,7 +82,7 @@ def parse_pmc_info(pmc_id):
                 elif member.path.endswith(".avi"):
                     current_file_contents = my_tar.extractfile(member)
                     content = current_file_contents.read()
-                    pmc_video_data[member.name] = content                
+                    pmc_video_data[member.name] = content
         
         for parsed_keys in pmc_xml_data:
             if parsed_keys == "article_metadata":
