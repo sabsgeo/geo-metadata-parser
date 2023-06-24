@@ -91,7 +91,7 @@ def parse_pmc_info(pmc_id):
             else:
                 if pmc_xml_data[parsed_keys] == None:
                     pmc_xml_data[parsed_keys] = []
-    return { "xml":pmc_xml_data, "image": pmc_image_data, "pdf": pmc_pdf_data, "compressed": pmc_zip_data, "video": pmc_video_data }
+    return { "xml":pmc_xml_data, "image": pmc_image_data, "pdf": pmc_doc_data, "compressed": pmc_zip_data, "video": pmc_video_data }
 
 def get_latest_pmc_updated_tar_time():
     url = "https://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_file_list.txt"
