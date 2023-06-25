@@ -39,27 +39,6 @@ def parse_arguments_from_docstring(func):
 
     return arguments
 
-def save_pmc_tar_path():
-    url = "https://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_file_list.txt"
-    latest_tar_time = pmc.get_latest_pmc_updated_tar_time()
-    pmc_file_name = "oa_file_list_{}.db".format(latest_tar_time)
-    pmc_list_path = os.path.join(os.getcwd(), pmc_file_name)
-    if not(os.path.exists(pmc_list_path)):
-        print("Adding the database")
-        con = sqlite3.connect(pmc_list_path)
-        cur = con.cursor()
-        cur.execute("CREATE TABLE oa_file_list(path TEXT, source TEXT, pmc_id TEXT, pmid TEXT, state TEXT, PRIMARY KEY (pmc_id))")
-
-        response = requests.get(url, stream=True)
-        input_data = []
-        for line in response.iter_lines():
-            if line:
-                line_array = line.decode("utf-8").split("\t")
-                if len(line_array) == 5:
-                    input_data.append(line_array)
-        cur.executemany("INSERT INTO oa_file_list (path, source, pmc_id, pmid, state) VALUES (?, ?, ?, ?, ?);", input_data)
-        con.commit()
-        print("Finished adding database")
 
 def remove_namespace(tree):
     for node in tree.iter():

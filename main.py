@@ -166,7 +166,6 @@ def add_data_from_pmc(number_of_process, min_memory):
     """
     to_be_added = main_helper.diff_bw_pmc_and_pubmed()
     print("To be added pmc metadata {}".format(str(len(to_be_added))))
-    general_helper.save_pmc_tar_path()
     parallel_runner.add_data_in_parallel(main_helper.add_metadata_from_pmc, {
                                          "list_to_parallel": to_be_added}, number_of_process, min_memory, False)
 

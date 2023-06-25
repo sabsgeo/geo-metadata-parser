@@ -4,6 +4,9 @@ import sqlite3
 import urllib.request
 import tarfile
 from helpers import general_helper, pubmed_oa_helper
+from lxml import etree
+import time
+
 
 def get_supplementary_info(path):
     supplementary_data = []
@@ -19,12 +22,27 @@ def get_supplementary_info(path):
 
     return supplementary_data
 
+def get_tar_link(pmc_id):
+    url = "https://www.ncbi.nlm.nih.gov/pmc/utils/oa/oa.fcgi?id={}".format(pmc_id)
+    number_of_retry = 3
+    retry_num = 0
+    while retry_num <= number_of_retry:
+        try:
+            with urllib.request.urlopen(url) as response:
+                xml_data = response.read()
+                elements = etree.fromstring(xml_data)
+                for link in elements.findall("./records//link"):
+                    if link.attrib["format"] == "tgz":
+                        url = link.attrib["href"]
+                        return url.replace("ftp://", "https://")
+            retry_num = number_of_retry + 1
+        except Exception as err:
+            retry_num = retry_num + 1
+            print("Not able to get the tar file for " + pmc_id + " going to retry")
+            time.sleep(5)
+    return None
 
 def parse_pmc_info(pmc_id):
-    latest_tar_time = get_latest_pmc_updated_tar_time()
-    pmc_file_name = "oa_file_list_{}.db".format(latest_tar_time)
-    pmc_list_path = os.path.join(os.getcwd(), pmc_file_name)
-
     pmc_xml_data = {
         "article_metadata": {},
         "supplementary_metadata": [],
@@ -38,22 +56,10 @@ def parse_pmc_info(pmc_id):
     pmc_doc_data = {}
     pmc_compressed_data = {}
 
-
-    if not (os.path.exists(pmc_list_path)):
-        raise Exception("db {} not found".format(pmc_list_path))
-
-    con = sqlite3.connect(pmc_list_path, check_same_thread=False)
-    cur = con.cursor()
-    cur.execute("SELECT * FROM oa_file_list WHERE pmc_id=?", (pmc_id,))
-    selected_row = cur.fetchone()
-    if not(selected_row == None):
-        tar_path = selected_row[0]
-    else:
-        print("Not able to get the path for {}".format(pmc_id))
+    tar_file = get_tar_link(pmc_id)
+    if tar_file == None:
         return {}
-    cur.close()
 
-    tar_file = "https://ftp.ncbi.nlm.nih.gov/pub/pmc/{}".format(tar_path)
     ftpstream = urllib.request.urlopen(tar_file)
     with tarfile.open(fileobj=ftpstream, mode="r|gz") as my_tar:
         for member in my_tar:
@@ -92,9 +98,3 @@ def parse_pmc_info(pmc_id):
                 if pmc_xml_data[parsed_keys] == None:
                     pmc_xml_data[parsed_keys] = []
     return { "xml":pmc_xml_data, "image": pmc_image_data, "pdf": pmc_doc_data, "compressed": pmc_compressed_data, "video": pmc_video_data }
-
-def get_latest_pmc_updated_tar_time():
-    url = "https://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_file_list.txt"
-    with urlopen(url) as file:
-        lines = [line.decode().strip() for _, line in zip(range(1), file)]
-    return lines[0]
