@@ -36,7 +36,7 @@ def parse_pmc_info(pmc_id):
     pmc_image_data = {}
     pmc_video_data = {}
     pmc_doc_data = {}
-    pmc_zip_data = {}
+    pmc_compressed_data = {}
 
 
     if not (os.path.exists(pmc_list_path)):
@@ -78,7 +78,7 @@ def parse_pmc_info(pmc_id):
                 elif member.path.endswith(".zip"):
                     current_file_contents = my_tar.extractfile(member)
                     content = current_file_contents.read()
-                    pmc_zip_data[member.name] = content   
+                    pmc_compressed_data[member.name] = content   
                 elif member.path.endswith(".avi"):
                     current_file_contents = my_tar.extractfile(member)
                     content = current_file_contents.read()
@@ -91,7 +91,7 @@ def parse_pmc_info(pmc_id):
             else:
                 if pmc_xml_data[parsed_keys] == None:
                     pmc_xml_data[parsed_keys] = []
-    return { "xml":pmc_xml_data, "image": pmc_image_data, "pdf": pmc_doc_data, "compressed": pmc_zip_data, "video": pmc_video_data }
+    return { "xml":pmc_xml_data, "image": pmc_image_data, "pdf": pmc_doc_data, "compressed": pmc_compressed_data, "video": pmc_video_data }
 
 def get_latest_pmc_updated_tar_time():
     url = "https://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_file_list.txt"

@@ -2,6 +2,7 @@ from geo import geo_mongo
 from geo import geo
 from geo import model_data
 from geo import pubmed
+from helpers import general_helper
 
 
 from pymongo import UpdateOne
@@ -113,7 +114,12 @@ def add_metadata_from_pmc(all_params):
         for upload_types in upload_data:
             for data_to_upload in upload_data.get(upload_types):
                 _id = hashlib.sha256(data_to_upload.encode()).hexdigest()
-                geo_mongo_instance.fs.put(upload_data.get(upload_types).get(data_to_upload), _id = _id)
+                if upload_types == "compressed":
+                    content_to_upload =  upload_data.get(upload_types).get(data_to_upload)
+                else:
+                    content_to_upload = general_helper.tar_gz_compress_string(data_to_upload, upload_data.get(upload_types).get(data_to_upload))          
+                
+                geo_mongo_instance.fs.put(content_to_upload, _id = _id)
         geo_mongo_instance.pmc_metadata_collection.insert_one(db_data)
 
 def add_series_and_sample_metadata(all_params):

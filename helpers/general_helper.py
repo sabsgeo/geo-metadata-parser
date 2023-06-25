@@ -1,6 +1,8 @@
 import os
 import inspect
 import re
+import io
+import tarfile
 
 try:
     from collections.abc import Iterable
@@ -120,3 +122,13 @@ def _flatten(l):
                 yield sub
         else:
             yield el
+
+def tar_gz_compress_string(file_name, input_buffer):
+    buffer = io.BytesIO()
+
+    with tarfile.open(fileobj=buffer, mode="w:gz") as tar:
+        tarinfo = tarfile.TarInfo(file_name)
+        tarinfo.size = len(input_buffer)
+        tar.addfile(tarinfo, io.BytesIO(input_buffer))
+    
+    return buffer.getvalue()
