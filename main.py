@@ -149,13 +149,14 @@ def get_data_from_pubmed(number_of_process, min_memory):
                                          "list_to_parallel": each_json}, number_of_process, min_memory, False)
 
 
-def add_data_from_pmc(number_of_process, min_memory):
+def add_data_from_pmc(number_of_process, min_memory, shuffle=False):
     """
     Add the pmc data into mongodb
 
     Args:
         number_of_process (int): The number of parallel processes to run.
         min_memory (int): The minimum memory that should be conserved in the system in which function runs.
+        shuffle (bool, optional): Flag indicating whether to shuffle the data. Defaults to False.
 
     Returns:
         None
@@ -167,7 +168,7 @@ def add_data_from_pmc(number_of_process, min_memory):
     to_be_added = main_helper.diff_bw_pmc_and_pubmed()
     print("To be added pmc metadata {}".format(str(len(to_be_added))))
     parallel_runner.add_data_in_parallel(main_helper.add_metadata_from_pmc, {
-                                         "list_to_parallel": to_be_added}, number_of_process, min_memory, False)
+                                         "list_to_parallel": to_be_added}, number_of_process, min_memory, shuffle)
 
 
 def main(function_call, all_func_args):
