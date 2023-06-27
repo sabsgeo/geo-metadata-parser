@@ -144,6 +144,7 @@ class ModelData():
         auth_set = set()
         for auth_name in article_metadata.get("author_list"):
             auth_name.pop()
+            auth_name = [x for x in auth_name if x is not None]
             try:
                 auth_set.add(",".join(auth_name))
             except:
