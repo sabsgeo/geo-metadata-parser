@@ -145,11 +145,7 @@ class ModelData():
         for auth_name in article_metadata.get("author_list"):
             auth_name.pop()
             auth_name = [x for x in auth_name if x is not None]
-            try:
-                auth_set.add(",".join(auth_name))
-            except:
-                print("There is issue in parsing pmc from {}".format(pmc_id))
-                raise
+            auth_set.add(",".join(auth_name))
         article_metadata["author_list"] = list(auth_set)
         main_data = {
             "supplementary_metadata": xml.get("supplementary_metadata"),
