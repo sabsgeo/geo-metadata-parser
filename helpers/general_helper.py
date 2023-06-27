@@ -19,6 +19,7 @@ from itertools import chain
 
 from geo import pmc
 
+
 def parse_arguments_from_docstring(func):
     docstring = inspect.getdoc(func)
     arg_pattern = r'\s+([\w_]+)\s*\(([^)]+)\):\s*([^:\n]+)'
@@ -35,7 +36,8 @@ def parse_arguments_from_docstring(func):
 
         arg_description = arg_match[2].strip()
 
-        arguments[arg_name] = {"type": arg_type, "description": arg_description}
+        arguments[arg_name] = {"type": arg_type,
+                               "description": arg_description}
 
     return arguments
 
@@ -50,25 +52,59 @@ def remove_namespace(tree):
             node.tag = node.tag.split("}", 1)[1]
 
 
+def add_parameters_to_xml(xml_string, tag_name, parameters):
+
+    # Construct the regular expression pattern
+    pattern = rf"<{tag_name}\s+(?P<attrs>[^>]*)>"
+
+    # Find the tag in the XML string using regular expressions
+    match = re.search(pattern, xml_string)
+
+    if match:
+        # Extract the existing attributes
+        attrs = match.group("attrs")
+
+        # Add the new parameters
+        for key, value in parameters.items():
+            attrs = f"{attrs} {key}=\"{value}\""
+
+        # Replace the original tag with the updated attributes
+        updated_xml_string = re.sub(
+            pattern, rf"<{tag_name} {attrs}>", xml_string)
+        return updated_xml_string
+    else:
+        print(f"Tag '{tag_name}' not found in the XML.")
+        return xml_string
+
+
 def read_xml(path, nxml=False):
     try:
         tree = etree.parse(path)
         if ".nxml" in path or nxml:
-            remove_namespace(tree)  # strip namespace when reading an XML file
+            remove_namespace(tree)
     except:
         try:
             tree = etree.fromstring(path)
         except Exception:
-            print(
-                "Error: it was not able to read a path, a file-like object, or a string as an XML"
-            )
-            raise
+            p = {
+                "xmlns:mml": "http://www.w3.org/1998/Math/MathML",
+                "xmlns:xlink": "http://www.w3.org/1999/xlink"
+            }
+            try:
+                return read_xml(add_parameters_to_xml(path.decode(), "article", p), nxml)
+            except:
+                print(
+                "Error: it was not able to read a path, a file-like object, a string as an XML, or not an link missing issue"
+                )
+                raise
     return tree
+
 
 def stringify_affiliation_rec(node):
     parts = _recur_children(node)
     parts_flatten = list(_flatten(parts))
     return " ".join(parts_flatten).strip()
+
 
 def stringify_children(node):
     parts = (
@@ -77,6 +113,7 @@ def stringify_children(node):
         + [node.tail]
     )
     return "".join(filter(None, parts))
+
 
 def _recur_children(node):
     if len(node.getchildren()) == 0:
@@ -94,6 +131,7 @@ def _recur_children(node):
         )
         return parts
 
+
 def _flatten(l):
     for el in l:
         if isinstance(el, Iterable) and not isinstance(el, string_types):
@@ -102,6 +140,7 @@ def _flatten(l):
         else:
             yield el
 
+
 def tar_gz_compress_string(file_name, input_buffer):
     buffer = io.BytesIO()
 
@@ -109,5 +148,5 @@ def tar_gz_compress_string(file_name, input_buffer):
         tarinfo = tarfile.TarInfo(file_name)
         tarinfo.size = len(input_buffer)
         tar.addfile(tarinfo, io.BytesIO(input_buffer))
-    
+
     return buffer.getvalue()
