@@ -1,28 +1,48 @@
-from lxml import etree
-import urllib.request
-import time
+id = [
+'2ce9f66bd5018187772743d5351dd05b7b15b926f78edb39eabeb36a5d7b0fbb',
+'87365582210d18d0a026f53ae5e0817c5dfbbb22dfa2ac7983969126f1a17ba2',
+'66b2a2ed415381d17720fd3ecff5e57d79fb6b54342fbdd27aae021ae21597fe',
+'cee52c9a3bffebf940cc75527d59fbcb84827f30a8ec9174abdc1161795f503c',
+'c9518bc159bff25269e375f4dcfe84d680394a4d20f789d6103505a8d34b2017',
+'73b4990a5596516aca072e1843d3f3b582d11d219e538016a2e7aeb557777ad9',
+'537f897831315a2f9244bc0581a87bbe2931dffcfbd47cc93cc18d4d2c3497ed',
+'215c7ece743cdcd03dadb95aad12fd827ca29a013072e398896dea50a33b5f52',
+'48660539a55430b5272838749540168442b72e88ca2d72542d676579cc546b0c',
+'d1e3b3118bec57f9a309cd2f4529a69e1380f012b05b9caaf7bd554a3546100d',
+'19038fe42fb1a622fab2da4b113cbd1235a87b460b65572c3530fd8178e0f5ce',
+'6d62c43f2bf99db79f90a159bba8f5bd70abd49d152362a87bd3b04441a6721f',
+'0716745f758077f804e66297911c8c19fc077772140f151ec8197953e4e40d95',
+'55f6b9392d4ade3a9689bcbee7a1cecc11f8e4dd0f2bcb3502e946357272ea8e',
+'cee52c9a3bffebf940cc75527d59fbcb84827f30a8ec9174abdc1161795f503c',
+'d211a89089666868d528459df792d3af6b57287c47ea93d76328aa29b212a271',
+'6d62c43f2bf99db79f90a159bba8f5bd70abd49d152362a87bd3b04441a6721f',
+'09e20dbec0fb48337deea19b9675112e13fea84ecbc8ad639bf4b9de9240d903',
+'73efc7c993f2462c09268846800b963f7acd0aaf0f44d61616d12d450ac7358b',
+'a5c9cb84f23d7f5beccea06877b7e4d9bf6785a91e720b3b52993ca482b2daed',
+'e095cc2762dd7ba0f757403c6189dbcb604f40c1b8c757de1eed2f646b1cad50',
+'a44254bec2c5871422bd5e28fb4366e747ced1b8a3c313f1d1b94d9343bff943',
+'47d0e0b6e0f068c66406550ee68b8f79ff9266158b5452e0848057e69a9da611',
+'6a65c0c1e8f1c9741dcd0145502b8b25c413d7f33d97f845936d0b045ef2c948',
+'16d182ea1c6574363a22c01ed8273722b773980a6436e3a59d3ce313bd5837bb',
+'51d7d0891b5977120715a6d15f7b739cebd94651ee2317df026ea58206445fb6',
+'25e0ec2bac58803d6510d2dc417138adf080788af4b73a8bd12c4fba3cc13acc',
+'3e431c159c21a06fe51744fdb6d9c92439c9b8ccc000864267c0943fb0a7588f',
+'ec21fe8eb147442f5347647e2aaf6e60ab0e9ff906288019a6925d631fe7170e',
+'0ddf626385c11d525c2d91e49832d322c8a4c9c88f12e52dffb1ba49ec3527ca',
+'576f1f1ce023841922bb00ce7dac72826d35800d995f0019366ca4e3a43bd335',
+'493ffffae45f1226d6720a96e95c109ee7cd275a1c3cc046fd824c7639c454d6',
+'c5500c558d9a8da676abf3f79c8aef23445d7ffc76b03aea4b17a51ab3931bc2',
+'c685fe8c3b76f3edf62afcfed7294999d5d303145e294f64c72fd35a3ef868d3',
+'db0facb0320af9818ff94a88973e198c8163d2222e4b191b31724e74ed92c5f3',
+'0047daaa5af4880717f9a6bd385e9769a13c651c94546fa09162c9c1c38c33cb',
+'fcb9b2c62269d0589699d064b35bc87b9030a97e2aefaea544263308e382343a',
+'cc1f245999c163f842957d35517f4c65f1607998289f16bb2d573b669b7474a3',
+'0076bb7b72adebd655e6d9da8fa49ac57d8d1aebb1459dba2fcc3d7a572fc3c8'
+]
 
-pmc_id = "PMC5334499"
+from geo import geo_mongo
 
-def get_tar_link(pmc_id):
-    url = "https://www.ncbi.nlm.nih.gov/pmc/utils/oa/oa.fcgi?id={}".format(pmc_id)
-    number_of_retry = 3
-    retry_num = 0
-    while retry_num <= number_of_retry:
-        try:
-            with urllib.request.urlopen(url) as response:
-                xml_data = response.read()
-                elements = etree.fromstring(xml_data)
-                for link in elements.findall("./records//link"):
-                    if link.attrib["format"] == "tgz":
-                        url = link.attrib["href"]
-                        return url.replace("ftp://", "https://")
-            retry_num = number_of_retry + 1
-        except Exception as err:
-            retry_num = retry_num + 1
-            print("Not able to get the tar file for " + pmc_id + " going to retry")
-            time.sleep(5)
-
-k = get_tar_link(pmc_id)
-print(k)
-
+p = geo_mongo.GeoMongo()
+for k in id:
+    p.geo_db.get_collection("fs.files").delete_one({"_id": k})
+    p.geo_db.get_collection("fs.chunks").delete_many({"files_id": k})
