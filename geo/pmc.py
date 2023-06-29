@@ -58,7 +58,7 @@ def parse_pmc_info(pmc_id):
 
     tar_file = get_tar_link(pmc_id)
     if tar_file == None:
-        print("Not able to find the tar file for {}".format(tar_file))
+        print("Not able to find the tar file for {}".format(pmc_id))
         return {}
 
     ftpstream = urllib.request.urlopen(tar_file)
