@@ -108,11 +108,9 @@ def add_metadata_from_pmc(all_params):
     list_to_add = all_params.get("list_to_parallel")
     for each_study in list_to_add:
         pmc_id = each_study
-        print("Going to add {}".format(pmc_id))
         db_data, upload_data = data_inst.extract_pmc_metadata(pmc_id)
         if len(db_data) < 1 and len(upload_data) < 1:
             continue
-        print("Uploading files for {}".format(pmc_id))
         for upload_types in upload_data:
             for data_to_upload in upload_data.get(upload_types):
                 _id = hashlib.sha256(data_to_upload.encode()).hexdigest()
@@ -121,11 +119,10 @@ def add_metadata_from_pmc(all_params):
                 else:
                     content_to_upload = general_helper.tar_gz_compress_string(data_to_upload, upload_data.get(upload_types).get(data_to_upload))          
                 
+                geo_mongo_instance.fs.delete(_id)
                 geo_mongo_instance.fs.put(content_to_upload, _id = _id)
-        print("Uploading files finished for {}".format(pmc_id))
     
         geo_mongo_instance.pmc_metadata_collection.insert_one(db_data)
-        print("Data added to DB for {}".format(pmc_id))
 
 def add_series_and_sample_metadata(all_params):
     list_to_add = all_params.get("list_to_parallel")

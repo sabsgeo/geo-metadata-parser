@@ -58,9 +58,9 @@ def parse_pmc_info(pmc_id):
 
     tar_file = get_tar_link(pmc_id)
     if tar_file == None:
+        print("Not able to find the tar file for {}".format(tar_file))
         return {}
 
-    print("Got the tar link for the {}".format(tar_file))
     ftpstream = urllib.request.urlopen(tar_file)
     with tarfile.open(fileobj=ftpstream, mode="r|gz") as my_tar:
         for member in my_tar:
@@ -91,8 +91,6 @@ def parse_pmc_info(pmc_id):
                     content = current_file_contents.read()
                     pmc_video_data[member.name] = content
         
-        print("Extraction of of tar file for {} finished".format(pmc_id))
-
         for parsed_keys in pmc_xml_data:
             if parsed_keys == "article_metadata":
                 if len(pmc_xml_data[parsed_keys].keys()) < 1:
