@@ -160,6 +160,8 @@ def add_series_and_sample_metadata(all_params):
                         
                         geo_instance.fs.delete(_id)
                         geo_instance.fs.put(content_to_upload, _id = _id)
+                
+                exit(0)
 
             # update status
             geo_instance.all_geo_series_collection.update_one({"_id": gse_id.get(
@@ -167,7 +169,6 @@ def add_series_and_sample_metadata(all_params):
         else:
             print("GSE ID {} is probably private".format(gse_id.get("gse_id")))
         
-        exit(0)
 
 def diff_bw_pmc_and_pubmed():
     geo_mongo_instance = geo_mongo.GeoMongo()
