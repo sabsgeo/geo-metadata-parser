@@ -4,7 +4,6 @@ from helpers import general_helper
 from pymongo import UpdateOne
 
 import time
-import hashlib
 
 def get_diff_between_geo_and_all_geo_series_sync_info(modified_gse_ids, get_gse_status):
     all_series_data_to_add = []
@@ -152,11 +151,8 @@ def add_series_and_sample_metadata(all_params):
                     if len(upload_types) < 1:
                         continue
                     for data_to_upload in upload_data.get(upload_types):
-                        _id = hashlib.sha256(data_to_upload.encode()).hexdigest()
-                        if upload_types == "compressed":
-                            content_to_upload =  upload_data.get(upload_types).get(data_to_upload)
-                        else:
-                            content_to_upload = general_helper.tar_gz_compress_string(data_to_upload, upload_data.get(upload_types).get(data_to_upload))          
+                        _id = data_to_upload
+                        content_to_upload = general_helper.tar_gz_compress_string(data_to_upload, upload_data.get(upload_types).get(data_to_upload))          
                         
                         geo_instance.fs.delete(_id)
                         geo_instance.fs.put(content_to_upload, _id = _id)

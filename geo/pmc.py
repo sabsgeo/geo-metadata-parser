@@ -48,10 +48,7 @@ def parse_pmc_info(pmc_id):
         "references": [],
         "paragraph": []
     }
-    pmc_image_data = {}
-    pmc_video_data = {}
-    pmc_doc_data = {}
-    pmc_compressed_data = {}
+    pmc_assets = {}
 
     tar_file = get_tar_link(pmc_id)
     if tar_file == None:
@@ -71,22 +68,10 @@ def parse_pmc_info(pmc_id):
                     pmc_xml_data["caption"] = pubmed_oa_helper.parse_pubmed_caption(content)
                     pmc_xml_data["references"] = pubmed_oa_helper.parse_pubmed_references(content)
                     pmc_xml_data["paragraph"] = pubmed_oa_helper.parse_pubmed_paragraph(content)
-                elif member.path.lower().endswith(tuple([".jpg", ".gif"])):
+                else:
                     current_file_contents = my_tar.extractfile(member)
                     content = current_file_contents.read()
-                    pmc_image_data[member.name] = content
-                elif member.path.lower().endswith(tuple([".pdf", ".docx", ".doc", ".xlsx", ".xls"])):
-                    current_file_contents = my_tar.extractfile(member)
-                    content = current_file_contents.read()
-                    pmc_doc_data[member.name] = content
-                elif member.path.lower().endswith(".zip"):
-                    current_file_contents = my_tar.extractfile(member)
-                    content = current_file_contents.read()
-                    pmc_compressed_data[member.name] = content   
-                elif member.path.lower().endswith(".avi"):
-                    current_file_contents = my_tar.extractfile(member)
-                    content = current_file_contents.read()
-                    pmc_video_data[member.name] = content
+                    pmc_assets[member.name] = content
         
         for parsed_keys in pmc_xml_data:
             if parsed_keys == "article_metadata":
@@ -95,4 +80,4 @@ def parse_pmc_info(pmc_id):
             else:
                 if pmc_xml_data[parsed_keys] == None:
                     pmc_xml_data[parsed_keys] = []
-    return { "xml":pmc_xml_data, "image": pmc_image_data, "pdf": pmc_doc_data, "compressed": pmc_compressed_data, "video": pmc_video_data }
+    return { "xml":pmc_xml_data, "assets": pmc_assets }
