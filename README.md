@@ -77,6 +77,14 @@ Adds or updates metadata for the GEO database to the internal database.
 - `shuffle (bool, optional)`: Flag indicating whether to shuffle the data. Defaults to False.
 
 
+### Access compressed assets
+```python
+k = geo_mongo.GeoMongo()
+id = "PMC3439153/NIHMS381381-supplement-10.xlsx"
+file = k.fs.get(id).read()
+file1 = tarfile.open(fileobj=io.BytesIO(file),mode='r:gz')
+file1.extract(id)
+```
 ## Contributing
 
 Not right now

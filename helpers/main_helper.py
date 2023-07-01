@@ -162,7 +162,6 @@ def add_series_and_sample_metadata(all_params):
                 "gse_id")}, {"$set": {"status": "up_to_date", "sample_status": "valid"}}, upsert=True)
         else:
             print("GSE ID {} is probably private".format(gse_id.get("gse_id")))
-        exit(0)
         
 
 def diff_bw_pmc_and_pubmed():
