@@ -1,4 +1,5 @@
-from geo import geo, pmc
+from geo import geo, pmc, pubmed
+
 
 import traceback
 
@@ -31,6 +32,9 @@ class ModelData():
         soft_file = {}
         series_metadata = {}
         all_sample_data = []
+        pubmed_metadata = []
+        pmc_metadata = []
+        pmc_assets = []
         
         try:
             soft_file = geo.read_full_soft_file(gse_id)
@@ -39,14 +43,14 @@ class ModelData():
             print(traceback.format_exc())
 
         if not (bool(soft_file)):
-            return series_metadata, all_sample_data
+            return series_metadata, all_sample_data, pubmed_metadata, pmc_metadata, pmc_assets
     
         modified_gse_id = gse_id
         if "SERIES" in soft_file:
             if not(gse_id in soft_file["SERIES"]):
                 modified_gse_id = "GSE" + str(int(gse_id[3:]))
 
-
+        # Series metadata collection
         if "SERIES" in soft_file:
             series_metadata = {
                 "_id": gse_id,
@@ -131,7 +135,41 @@ class ModelData():
         else:
             print("Sample not found for GSE ID " + gse_id)
 
-        return series_metadata, all_sample_data
+        # pubmed metadata collection
+        pubmed_ids = series_metadata.get("Series_pubmed_id")
+        if len(pubmed_ids) > 0:
+            for pubmed_id in pubmed_ids:
+                pub_json = pubmed.parse_medline(pubmed_id)
+                pubmed_data = {
+                    "_id": str(pubmed_id),
+                    "pmid": str(pubmed_id),
+                    "pmc_id": pub_json.get("PMC", ""),
+                    "title": pub_json.get("TI", ""),
+                    "transliterated_title": pub_json.get("TT", ""),
+                    "journal_title": pub_json.get("JT", ""),
+                    "journal_title_abbreviation": pub_json.get("TA", ""),
+                    "publication_type": pub_json.get("PT", []),
+                    "abstract": pub_json.get("AB", ""),
+                    "medical_subject_headings": pub_json.get("MH", []),
+                    "source": pub_json.get("SO", ""),
+                    "article_identifier": pub_json.get("AID", []),
+                    "general_note": pub_json.get("GN", ""),
+                    "substance_name": pub_json.get("NM", ""),
+                    "registry_number": pub_json.get("RN", [])
+                }
+                pubmed_metadata.append(pubmed_data)
+                # PMC metadata collection
+                if pubmed_data.get("pmc_id") == "":
+                    print("pmc id not present")
+                else:
+                    _pmc_metadata, _pmc_assets = self.extract_pmc_metadata(pubmed_data.get("pmc_id"))
+                    pmc_metadata.append(_pmc_metadata)
+                    pmc_assets.append(_pmc_assets)
+
+        else:
+            print("Pubmed id not present")
+
+        return series_metadata, all_sample_data, pubmed_metadata, pmc_metadata, pmc_assets
     
     def extract_pmc_metadata(self, pmc_id):
         study_all_data = pmc.parse_pmc_info(pmc_id)

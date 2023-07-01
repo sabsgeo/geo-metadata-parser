@@ -1,6 +1,3 @@
-import os
-from urllib.request import urlopen
-import sqlite3
 import urllib.request
 import tarfile
 from helpers import general_helper, pubmed_oa_helper

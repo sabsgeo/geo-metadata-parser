@@ -123,52 +123,10 @@ def add_update_metadata(number_of_process, min_memory, shuffle=False):
 
     print("Number of data to be updated/added: " + str(len(list_to_add)))
 
-    parallel_runner.add_data_in_parallel(main_helper.add_series_and_sample_metadata, {
-                                         "list_to_parallel": list_to_add}, number_of_process, min_memory, shuffle)
+    main_helper.add_series_and_sample_metadata( {"list_to_parallel": list_to_add})
+    # parallel_runner.add_data_in_parallel(main_helper.add_series_and_sample_metadata, {
+                                        #  "list_to_parallel": list_to_add}, number_of_process, min_memory, shuffle)
 
-
-def get_data_from_pubmed(number_of_process, min_memory):
-    """
-    Gets the data from pubmed
-
-    Args:
-        number_of_process (int): The number of parallel processes to run.
-        min_memory (int): The minimum memory that should be conserved in the system in which function runs.
-
-    Returns:
-        None
-
-    Raises:
-        None
-
-    """
-    json_data = open('/mnt/series_metadataMonday_Jun_19_2023_04:22:06.json')
-    json_data = json_data.read()
-    each_json = json_data.split("\n")
-    parallel_runner.add_data_in_parallel(main_helper.get_into_from_pubmed, {
-                                         "list_to_parallel": each_json}, number_of_process, min_memory, False)
-
-
-def add_data_from_pmc(number_of_process, min_memory, shuffle=False):
-    """
-    Add the pmc data into mongodb
-
-    Args:
-        number_of_process (int): The number of parallel processes to run.
-        min_memory (int): The minimum memory that should be conserved in the system in which function runs.
-        shuffle (bool, optional): Flag indicating whether to shuffle the data. Defaults to False.
-
-    Returns:
-        None
-
-    Raises:
-        None
-
-    """
-    to_be_added = main_helper.diff_bw_pmc_and_pubmed()
-    print("To be added pmc metadata {}".format(str(len(to_be_added))))
-    parallel_runner.add_data_in_parallel(main_helper.add_metadata_from_pmc, {
-                                         "list_to_parallel": to_be_added}, number_of_process, min_memory, shuffle)
 
 
 def main(function_call, all_func_args):

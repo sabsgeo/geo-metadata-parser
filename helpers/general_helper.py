@@ -1,4 +1,3 @@
-import os
 import inspect
 import re
 import io
@@ -11,8 +10,6 @@ except:
 
 from six import string_types
 
-import requests
-import sqlite3
 from lxml import etree
 from itertools import chain
 

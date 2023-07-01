@@ -1,15 +1,9 @@
-from geo import geo_mongo
-from geo import geo
-from geo import model_data
-from geo import pubmed
+from geo import geo_mongo, geo, model_data
 from helpers import general_helper
 
-
 from pymongo import UpdateOne
+
 import time
-import json
-import csv
-import random
 import hashlib
 
 def get_diff_between_geo_and_all_geo_series_sync_info(modified_gse_ids, get_gse_status):
@@ -102,28 +96,6 @@ def add_geo_sync_info_to_mongo(all_params):
             update_oper, ordered=False)
     time.sleep(time_to_wait_in_min * 60)
 
-def add_metadata_from_pmc(all_params):
-    geo_mongo_instance = geo_mongo.GeoMongo()
-    data_inst = model_data.ModelData()
-    list_to_add = all_params.get("list_to_parallel")
-    for each_study in list_to_add:
-        pmc_id = each_study
-        db_data, upload_data = data_inst.extract_pmc_metadata(pmc_id)
-        if len(db_data) < 1 and len(upload_data) < 1:
-            continue
-        for upload_types in upload_data:
-            for data_to_upload in upload_data.get(upload_types):
-                _id = hashlib.sha256(data_to_upload.encode()).hexdigest()
-                if upload_types == "compressed":
-                    content_to_upload =  upload_data.get(upload_types).get(data_to_upload)
-                else:
-                    content_to_upload = general_helper.tar_gz_compress_string(data_to_upload, upload_data.get(upload_types).get(data_to_upload))          
-                
-                geo_mongo_instance.fs.delete(_id)
-                geo_mongo_instance.fs.put(content_to_upload, _id = _id)
-    
-        geo_mongo_instance.pmc_metadata_collection.insert_one(db_data)
-
 def add_series_and_sample_metadata(all_params):
     list_to_add = all_params.get("list_to_parallel")
     data_model = model_data.ModelData()
@@ -131,7 +103,7 @@ def add_series_and_sample_metadata(all_params):
 
     for gse_id in list_to_add:
         print("Started adding/updating " + gse_id.get("gse_id"))
-        updated_series_data, updated_sample_data = data_model.extract_all_metadata_info_from_softfile(
+        updated_series_data, updated_sample_data, pubmed_metadata, pmc_metadata, pmc_assets = data_model.extract_all_metadata_info_from_softfile(
             gse_id.get("gse_id"))
 
         if bool(updated_series_data):
@@ -140,6 +112,7 @@ def add_series_and_sample_metadata(all_params):
             geo_instance.series_metadata_collection.update_one(
                 {"_id": series_id}, {"$set": updated_series_data}, upsert=True)
 
+            #update sample
             oper = []
             for each_sample in updated_sample_data:
                 sample_id = each_sample.get("_id")
@@ -148,52 +121,56 @@ def add_series_and_sample_metadata(all_params):
             if len(oper) > 0:
                 geo_instance.sample_metadata_collection.bulk_write(
                     oper, ordered=False)
+            
+            #update pubmed metadata
+            oper = []
+            for each_pubmed in pubmed_metadata:
+                if len(each_pubmed) < 1:
+                    continue
+                pubmed_id = each_pubmed.get("_id")
+                oper.append(UpdateOne({"_id": pubmed_id}, {
+                            "$set": each_pubmed}, upsert=True))
+            if len(oper) > 0:
+                geo_instance.pubmed_metadata_collection.bulk_write(
+                    oper, ordered=False)
+            
+            #update pmc metadata
+            oper = []
+            for each_pmc in pmc_metadata:
+                if len(each_pmc) < 1:
+                    continue
+                pmc_id = each_pmc.get("_id")
+                oper.append(UpdateOne({"_id": pmc_id}, {
+                            "$set": each_pmc}, upsert=True))
+            if len(oper) > 0:
+                geo_instance.pmc_metadata_collection.bulk_write(
+                    oper, ordered=False)
+            
+            # uploading assets
+            for upload_data in pmc_assets:
+                for upload_types in upload_data:
+                    if len(upload_types) < 1:
+                        continue
+                    for data_to_upload in upload_data.get(upload_types):
+                        _id = hashlib.sha256(data_to_upload.encode()).hexdigest()
+                        if upload_types == "compressed":
+                            content_to_upload =  upload_data.get(upload_types).get(data_to_upload)
+                        else:
+                            content_to_upload = general_helper.tar_gz_compress_string(data_to_upload, upload_data.get(upload_types).get(data_to_upload))          
+                        
+                        geo_instance.fs.delete(_id)
+                        geo_instance.fs.put(content_to_upload, _id = _id)
 
             # update status
             geo_instance.all_geo_series_collection.update_one({"_id": gse_id.get(
                 "gse_id")}, {"$set": {"status": "up_to_date", "sample_status": "valid"}}, upsert=True)
         else:
             print("GSE ID {} is probably private".format(gse_id.get("gse_id")))
+        
+        exit(0)
 
 def diff_bw_pmc_and_pubmed():
     geo_mongo_instance = geo_mongo.GeoMongo()
     studies_with_pmc = geo_mongo_instance.pubmed_metadata_collection.distinct("pmc_id", {})
     data_collected = geo_mongo_instance.pmc_metadata_collection.distinct("_id", {})
     return list(set(studies_with_pmc) - set(data_collected))
-
-def get_into_from_pubmed(all_params):
-    pubmed_id_added = set()
-    list_to_add = all_params.get("list_to_parallel")
-    headers = ['pmid', 'pmc_id', 'title', 'transliterated_title', 'journal_title', 'journal_title_abbreviation',
-               'publication_type', 'abstract', 'medical_subject_headings', 'source', 'article_identifier',
-               'general_note', 'substance_name', 'registry_number']
-    pro_num = random.getrandbits(128)
-    with open('/mnt/pmbmed_id_info_{}.csv'.format(str(pro_num)), 'w') as write_file:
-        writer = csv.DictWriter(write_file, fieldnames=headers)
-        for each_data in list_to_add:
-            pubmed_ids = json.loads(each_data).get("Series_pubmed_id")
-            if len(pubmed_ids) > 0:
-                for pubmed_id in pubmed_ids:
-                    if not (pubmed_id in pubmed_id_added):
-                        print("Trying to add pubmed id {}".format(pubmed_id))
-                        pub_json = pubmed.parse_medline(pubmed_id)
-                        writer.writerow({
-                            "pmid": pubmed_id,
-                            "pmc_id": pub_json.get("PMC", ""),
-                            "title": pub_json.get("TI", ""),
-                            "transliterated_title": pub_json.get("TT", ""),
-                            "journal_title": pub_json.get("JT", ""),
-                            "journal_title_abbreviation": pub_json.get("TA", ""),
-                            "publication_type": pub_json.get("PT", []),
-                            "abstract": pub_json.get("AB", ""),
-                            "medical_subject_headings": pub_json.get("MH", []),
-                            "source": pub_json.get("SO", ""),
-                            "article_identifier": pub_json.get("AID", []),
-                            "general_note": pub_json.get("GN", ""),
-                            "substance_name": pub_json.get("NM", ""),
-                            "registry_number": pub_json.get("RN", [])
-                        })
-                        pubmed_id_added.add(pubmed_id)
-                        print("Added pubmed id {}".format(pubmed_id))
-            else:
-                print("Not present")
