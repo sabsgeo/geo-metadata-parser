@@ -152,6 +152,7 @@ def add_series_and_sample_metadata(all_params):
                     if len(upload_types) < 1:
                         continue
                     for data_to_upload in upload_data.get(upload_types):
+                        print(data_to_upload)
                         _id = hashlib.sha256(data_to_upload.encode()).hexdigest()
                         if upload_types == "compressed":
                             content_to_upload =  upload_data.get(upload_types).get(data_to_upload)
