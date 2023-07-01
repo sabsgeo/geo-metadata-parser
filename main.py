@@ -123,9 +123,9 @@ def add_update_metadata(number_of_process, min_memory, shuffle=False):
 
     print("Number of data to be updated/added: " + str(len(list_to_add)))
 
-    main_helper.add_series_and_sample_metadata( {"list_to_parallel": list_to_add})
-    # parallel_runner.add_data_in_parallel(main_helper.add_series_and_sample_metadata, {
-                                        #  "list_to_parallel": list_to_add}, number_of_process, min_memory, shuffle)
+    # main_helper.add_series_and_sample_metadata( {"list_to_parallel": list_to_add})
+    parallel_runner.add_data_in_parallel(main_helper.add_series_and_sample_metadata, {
+                                         "list_to_parallel": list_to_add}, number_of_process, min_memory, shuffle)
 
 
 

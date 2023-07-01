@@ -152,7 +152,6 @@ def add_series_and_sample_metadata(all_params):
                     if len(upload_types) < 1:
                         continue
                     for data_to_upload in upload_data.get(upload_types):
-                        print(data_to_upload)
                         _id = hashlib.sha256(data_to_upload.encode()).hexdigest()
                         if upload_types == "compressed":
                             content_to_upload =  upload_data.get(upload_types).get(data_to_upload)
@@ -162,8 +161,6 @@ def add_series_and_sample_metadata(all_params):
                         geo_instance.fs.delete(_id)
                         geo_instance.fs.put(content_to_upload, _id = _id)
                 
-                exit(0)
-
             # update status
             geo_instance.all_geo_series_collection.update_one({"_id": gse_id.get(
                 "gse_id")}, {"$set": {"status": "up_to_date", "sample_status": "valid"}}, upsert=True)
