@@ -6,7 +6,7 @@ if [ -z "$ST" ]; then
         /home/ubuntu/geo-metadata-parser/stop_docker.sh
         sudo systemctl restart mongod | grep "running"
         sleep 5
-        /home/ubuntu/geo-metadata-parser/run_docker.sh
+        $(cd /home/ubuntu/geo-metadata-parser/ && ./run_docker.sh)
 else
         echo "${DD}:- Everything is good"
 fi
