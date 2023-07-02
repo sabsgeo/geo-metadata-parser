@@ -4,7 +4,7 @@ DD=$(date)
 if [ -z "$ST" ]; then
         echo "${DD}:- Mongo DB need to be restarted"
         /home/ubuntu/geo-metadata-parser/stop_docker.sh
-        sudo systemctl restart mongod
+        sudo systemctl restart mongod | grep "running"
         sleep 5
         /home/ubuntu/geo-metadata-parser/run_docker.sh
 else
