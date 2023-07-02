@@ -1,3 +1,4 @@
+#!/bin/bash
 git pull
 sudo docker build -t geo-metadata-parser .
 RAND=$(openssl rand -hex 6)
