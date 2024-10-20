@@ -31,8 +31,9 @@ def get_recently_modified_gse_ids(n_days):
     gse_ids = []
 
     for geo_id in geo_ids:
-        gse_ids.append("GSE{}".format(geo_id[3:]))
-
+        # gse_ids.append("GSE{}".format(geo_id[3:]))
+        gse_ids.append("GSE{}".format(geo_id[3:].lstrip('0')))
+        # print("GSE{}".format(geo_id[3:].lstrip('0')))
     return gse_ids
 
 
